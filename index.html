@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00A651">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>GazDispo - Trouvez du gaz au Burkina Faso</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">🔥</span>
+                <h1>GazDispo</h1>
+            </div>
+            <div class="header-actions">
+                <select id="languageSelector" class="language-selector">
+                    <option value="fr">Français</option>
+                    <option value="moore">Mooré</option>
+                </select>
+                <button id="refreshBtn" class="btn-refresh">
+                    <span class="refresh-icon">🔄</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div id="map" class="map-container"></div>
+        <div class="bottom-panel">
+            <div class="panel-header">
+                <h2 id="panelTitle">Points de vente</h2>
+                <div class="last-update">
+                    <span id="lastUpdateLabel">Mis à jour:</span>
+                    <span id="lastUpdateTime">--:--</span>
+                </div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un quartier...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="status-dot available"></span>
+                    <span id="legendAvailable">Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <span class="status-dot limited"></span>
+                    <span id="legendLimited">Stock limité</span>
+                </div>
+                <div class="legend-item">
+                    <span class="status-dot unavailable"></span>
+                    <span id="legendUnavailable">Rupture</span>
+                </div>
+            </div>
+            <div id="stationsList" class="stations-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <a href="admin.html" class="admin-btn">⚙️</a>
+
+    <div id="offlineIndicator" class="offline-indicator hidden">
+        <span>📡 Mode hors ligne</span>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="firebase-app.js"></script>
+<script src="firebase-database.js"></script>
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- App -->
+    <script src="app.js"></script>
+</body>
+</html>

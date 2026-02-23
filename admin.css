@@ -1,0 +1,345 @@
+/* === ADMIN STYLES === */
+
+.admin-main {
+    margin-top: 70px;
+    padding: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-back {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--color-white);
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-back:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* === LOGIN SCREEN === */
+.login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 150px);
+}
+
+.login-card {
+    background: var(--color-white);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+}
+
+#loginForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#passwordInput {
+    padding: 1rem;
+    border: 2px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#passwordInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0,166,81,0.1);
+}
+
+.btn-login {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background: #008C45;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,166,81,0.3);
+}
+
+.login-hint {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+.login-hint strong {
+    color: var(--color-primary);
+}
+
+/* === ADMIN PANEL === */
+.admin-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-section {
+    background: var(--color-white);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.admin-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+/* === STATION FORM === */
+.station-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.station-form input,
+.station-form select {
+    padding: 1rem;
+    border: 2px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.station-form input:focus,
+.station-form select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0,166,81,0.1);
+}
+
+.coords-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.help-text {
+    background: #F0F8FF;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #2C3E50;
+    border-left: 4px solid #4A90E2;
+}
+
+.help-text a {
+    color: #4A90E2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+.btn-submit {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background: #008C45;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,166,81,0.3);
+}
+
+/* === ADMIN STATIONS LIST === */
+.admin-stations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-station-card {
+    background: #FAFAFA;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--color-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+}
+
+.admin-station-info {
+    flex: 1;
+}
+
+.admin-station-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+}
+
+.admin-station-address {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.admin-station-coords {
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+    font-family: monospace;
+}
+
+.admin-station-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 160px;
+}
+
+.status-btn {
+    padding: 0.6rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.status-btn.available {
+    background: rgba(0,166,81,0.1);
+    color: var(--color-available);
+    border-color: var(--color-available);
+}
+
+.status-btn.available.active {
+    background: var(--color-available);
+    color: white;
+}
+
+.status-btn.limited {
+    background: rgba(252,209,22,0.1);
+    color: #D4A017;
+    border-color: #D4A017;
+}
+
+.status-btn.limited.active {
+    background: var(--color-limited);
+    color: white;
+}
+
+.status-btn.unavailable {
+    background: rgba(239,43,45,0.1);
+    color: var(--color-unavailable);
+    border-color: var(--color-unavailable);
+}
+
+.status-btn.unavailable.active {
+    background: var(--color-unavailable);
+    color: white;
+}
+
+.status-btn:hover {
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    background: #FF6B6B;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background: #EE5555;
+    transform: scale(1.05);
+}
+
+/* === SUCCESS MESSAGE === */
+.success-message {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .admin-main {
+        padding: 1rem;
+    }
+    
+    .admin-section {
+        padding: 1.5rem;
+    }
+    
+    .coords-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-station-card {
+        flex-direction: column;
+    }
+    
+    .admin-station-actions {
+        width: 100%;
+    }
+}
