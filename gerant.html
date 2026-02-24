@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GazDispo - Accès Gérant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #00A651 0%, #008C45 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { color: #00A651; font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { color: #7F8C8D; font-size: 0.9rem; }
+        .login-box { display: block; }
+        .login-box.hidden { display: none; }
+        .dashboard { display: none; }
+        .dashboard.active { display: block; }
+        input { width: 100%; padding: 1rem; border: 2px solid #E0E0E0; border-radius: 10px; font-size: 1rem; margin-bottom: 1rem; }
+        input:focus { outline: none; border-color: #00A651; }
+        .btn { background: #00A651; color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn:hover { background: #008C45; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,166,81,0.3); }
+        .btn:active { transform: translateY(0); }
+        .station-card { background: #F8F9FA; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #00A651; }
+        .station-name { font-size: 1.3rem; font-weight: bold; color: #2C3E50; margin-bottom: 0.5rem; }
+        .station-address { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 1rem; }
+        .status-group { margin-top: 1.5rem; }
+        .status-group label { display: block; color: #2C3E50; font-weight: bold; margin-bottom: 0.8rem; font-size: 1rem; }
+        .status-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+        .status-btn { padding: 1rem 0.5rem; border-radius: 10px; border: 3px solid; font-size: 0.9rem; font-weight: bold; cursor: pointer; background: white; transition: 0.2s; text-align: center; }
+        .status-btn:hover { transform: scale(1.05); }
+        .status-btn.available { border-color: #00A651; color: #00A651; }
+        .status-btn.available.active { background: #00A651; color: white; }
+        .status-btn.limited { border-color: #FCD116; color: #D4A017; }
+        .status-btn.limited.active { background: #FCD116; color: white; }
+        .status-btn.unavailable { border-color: #EF2B2D; color: #EF2B2D; }
+        .status-btn.unavailable.active { background: #EF2B2D; color: white; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #00A651; color: white; padding: 1rem 2rem; border-radius: 10px; font-weight: bold; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .error { background: #EF2B2D !important; }
+        .btn-logout { background: #7F8C8D; margin-top: 1rem; }
+        .btn-logout:hover { background: #5D6D7E; }
+        .hint { background: #E8F5E9; padding: 1rem; border-radius: 8px; color: #2C3E50; font-size: 0.9rem; margin-bottom: 1rem; border-left: 4px solid #00A651; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🔐 Accès Gérant</h1>
+        <p>Mettez à jour votre station en temps réel</p>
+    </div>
+
+    <div id="loginBox" class="login-box">
+        <div class="hint">
+            ℹ️ Entrez le code fourni par l'administrateur GazDispo
+        </div>
+        <input type="text" id="codeInput" placeholder="Code de votre station (ex: tampouy)" autocomplete="off">
+        <button class="btn" onclick="login()">Se connecter</button>
+    </div>
+
+    <div id="dashboard" class="dashboard">
+        <div id="stationInfo"></div>
+        <button class="btn btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+</div>
+
+<script src="firebase-app.js"></script>
+<script src="firebase-database.js"></script>
+
+<script>
+var firebaseConfig = {
+    apiKey: "AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
+    authDomain: "gazdispo-5a9b1.firebaseapp.com",
+    databaseURL: "https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "gazdispo-5a9b1",
+    storageBucket: "gazdispo-5a9b1.firebasestorage.app",
+    messagingSenderId: "815895848815",
+    appId: "1:815895848815:web:d6fdc94accc1f670ac6a9a"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+var currentStation = null;
+var currentCode = null;
+
+var gerantCodes = {
+    'tampouy': 'station_1771863010190',
+    'station1': 'station_1771863084970',
+    'station2': 'station_1771863177801',
+    'station3': 'station_1771863366401',
+    'station4': 'station_1771863573117',
+    'station5': 'station_1771863704637',
+    'station6': 'station_1771863792062',
+    'station7': 'station_1771878000375',
+    'station8': 'station_1771934283037'
+};
+
+function login() {
+    var code = document.getElementById('codeInput').value.trim().toLowerCase();
+    
+    if (!code) {
+        showToast('Veuillez entrer un code', true);
+        return;
+    }
+    
+    var stationId = gerantCodes[code];
+    
+    if (!stationId) {
+        showToast('Code invalide. Contactez administrateur.', true);
+        return;
+    }
+    
+    currentCode = code;
+    
+    db.ref('stations/' + stationId).once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            currentStation = snapshot.val();
+            showDashboard();
+        } else {
+            showToast('Station non trouvée.', true);
+        }
+    }).catch(function(error) {
+        showToast('Erreur de connexion', true);
+    });
+}
+
+function showDashboard() {
+    document.getElementById('loginBox').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('active');
+    
+    displayStation();
+    
+    db.ref('stations/' + currentStation.id).on('value', function(snapshot) {
+        if (snapshot.exists()) {
+            currentStation = snapshot.val();
+            displayStation();
+        }
+    });
+}
+
+function displayStation() {
+    var container = document.getElementById('stationInfo');
+    
+    var html = '<div class="station-card">';
+    html += '<div class="station-name">' + currentStation.name + '</div>';
+    html += '<div class="station-address">📍 ' + currentStation.address + '</div>';
+    
+    html += '<div class="status-group">';
+    html += '<label>Statut actuel de votre station :</label>';
+    html += '<div class="status-btns">';
+    html += '<button class="status-btn available' + (currentStation.status === 'available' ? ' active' : '') + '" onclick="updateStatus(\'available\')">✅<br>Disponible</button>';
+    html += '<button class="status-btn limited' + (currentStation.status === 'limited' ? ' active' : '') + '" onclick="updateStatus(\'limited\')">⚠️<br>Limité</button>';
+    html += '<button class="status-btn unavailable' + (currentStation.status === 'unavailable' ? ' active' : '') + '" onclick="updateStatus(\'unavailable\')">❌<br>Rupture</button>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+function updateStatus(newStatus) {
+    if (!currentStation) return;
+    
+    db.ref('stations/' + currentStation.id).update({
+        status: newStatus,
+        updatedAt: Date.now()
+    }).then(function() {
+        currentStation.status = newStatus;
+        var statusText = newStatus === 'available' ? 'Disponible' : newStatus === 'limited' ? 'Stock limité' : 'Rupture';
+        showToast('Statut mis à jour : ' + statusText);
+        displayStation();
+    }).catch(function(error) {
+        showToast('Erreur de mise à jour', true);
+    });
+}
+
+function logout() {
+    currentStation = null;
+    currentCode = null;
+    document.getElementById('loginBox').classList.remove('hidden');
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('codeInput').value = '';
+}
+
+function showToast(msg, isError) {
+    var toast = document.createElement('div');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3000);
+}
+</script>
+
+</body>
+</html>
