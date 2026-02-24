@@ -56,7 +56,7 @@
         <h2>🔐 Connexion Admin</h2>
         <input type="password" id="passwordInput" placeholder="Mot de passe">
         <button class="btn-login" onclick="login()">Se connecter</button>
-        <p style="margin-top:1rem;color:#999;font-size:0.9rem;">Mot de passe: <strong>admin123</strong></p>
+<p style="margin-top:1rem;color:#999;font-size:0.9rem;">Contactez l'administrateur pour le mot de passe</p>
     </div>
 </div>
 
@@ -66,7 +66,7 @@
         <h2>➕ Ajouter un point de vente</h2>
         <input type="text" id="nom" placeholder="Nom de la station">
         <input type="text" id="adresse" placeholder="Adresse / Quartier">
-        <div class="coords">
+       <input type="tel" id="telephone" placeholder="Téléphone (ex: 70 12 34 56)"> <div class="coords">
             <input type="number" id="lat" placeholder="Latitude (ex: 12.37)" step="0.000001">
             <input type="number" id="lng" placeholder="Longitude (ex: -1.52)" step="0.000001">
         </div>
@@ -104,7 +104,7 @@ var db = firebase.database();
 
 function login() {
     var pwd = document.getElementById('passwordInput').value;
-    if (pwd === 'admin123') {
+   if (pwd === 'GazBF2026!Secure#') {
         document.getElementById('loginBox').classList.add('hidden');
         document.getElementById('adminBox').classList.remove('hidden');
         connecterFirebase();
@@ -140,7 +140,9 @@ function afficherStations(data) {
         html += '<div class="station-name">' + s.name + '</div>';
         html += '<span class="status-badge ' + badgeClass + '">' + badgeText + '</span>';
         html += '<div class="station-address">📍 ' + s.address + '</div>';
-        html += '<div class="station-btns">';
+       if (s.phone) {
+    html += '<div class="station-phone">📞 <a href="tel:' + s.phone + '">' + s.phone + '</a></div>';
+} html += '<div class="station-btns">';
         html += '<button class="btn-status btn-available' + (s.status === 'available' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'available\')">✅</button>';
         html += '<button class="btn-status btn-limited' + (s.status === 'limited' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'limited\')">⚠️</button>';
         html += '<button class="btn-status btn-unavailable' + (s.status === 'unavailable' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'unavailable\')">❌</button>';
@@ -153,13 +155,22 @@ function afficherStations(data) {
 function ajouterStation() {
     var nom = document.getElementById('nom').value.trim();
     var adresse = document.getElementById('adresse').value.trim();
-    var lat = parseFloat(document.getElementById('lat').value);
+    var telephone = document.getElementById('telephone').value.trim();var lat = parseFloat(document.getElementById('lat').value);
     var lng = parseFloat(document.getElementById('lng').value);
     var statut = document.getElementById('statut').value;
     if (!nom || !adresse) { alert('Remplissez le nom et l\'adresse !'); return; }
     if (isNaN(lat) || isNaN(lng)) { alert('Coordonnées invalides !'); return; }
     var id = 'station_' + Date.now();
-    var station = { id: id, name: nom, address: adresse, lat: lat, lng: lng, status: statut, updatedAt: Date.now() };
+    var station = {
+    id: id,
+    name: nom,
+    address: adresse,
+    phone: telephone,
+    lat: lat,
+    lng: lng,
+    status: statut,
+    updatedAt: Date.now()
+};
     db.ref('stations/' + id).set(station).then(function() {
         afficherToast('✅ Station ajoutée !');
         document.getElementById('nom').value = '';
