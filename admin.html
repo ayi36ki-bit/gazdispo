@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GazDispo - Admin</title>
+    <title>GazDispo - Administration</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
         .header { background: #00A651; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 1.3rem; }
         .btn-back { color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; }
-        .main { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
+        .main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
         .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .card h2 { margin-bottom: 1rem; color: #2C3E50; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
         input, select { width: 100%; padding: 0.8rem; border: 2px solid #E0E0E0; border-radius: 8px; font-size: 1rem; margin-bottom: 0.8rem; }
@@ -20,28 +20,30 @@
         .btn-add { background: #00A651; color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 0.5rem; }
         .btn-add:hover { background: #008C45; }
         .hint { background: #E8F5E9; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; color: #2C3E50; margin-bottom: 0.8rem; border-left: 4px solid #00A651; }
+        .brands-section { background: #F8F9FA; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; }
+        .brands-section h3 { font-size: 1rem; color: #2C3E50; margin-bottom: 0.8rem; }
+        .brand-group { background: white; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.8rem; border-left: 3px solid #00A651; }
+        .brand-name { font-weight: bold; color: #2C3E50; margin-bottom: 0.5rem; display: flex; align-items: center; }
+        .brand-name input[type="checkbox"] { margin-right: 0.5rem; width: auto; }
+        .formats { display: flex; gap: 1rem; flex-wrap: wrap; margin-left: 1.5rem; }
+        .format-option { display: flex; align-items: center; gap: 0.3rem; }
+        .format-option input[type="checkbox"] { width: auto; margin: 0; }
         .station { background: #FAFAFA; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 4px solid #00A651; }
         .station-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 0.3rem; }
-        .station-address { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 0.8rem; }
-        .station-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .btn-status { padding: 0.5rem 0.8rem; border-radius: 6px; border: 2px solid; font-size: 0.85rem; font-weight: bold; cursor: pointer; background: white; }
-        .btn-available { border-color: #00A651; color: #00A651; }
-        .btn-available.active { background: #00A651; color: white; }
-        .btn-limited { border-color: #FCD116; color: #D4A017; }
-        .btn-limited.active { background: #FCD116; color: white; }
-        .btn-unavailable { border-color: #EF2B2D; color: #EF2B2D; }
-        .btn-unavailable.active { background: #EF2B2D; color: white; }
+        .station-address { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .station-phone { color: #00A651; font-size: 0.9rem; margin-bottom: 0.8rem; }
+        .station-brands { margin: 0.8rem 0; font-size: 0.85rem; }
+        .brand-badge { display: inline-block; background: #E8F5E9; color: #00A651; padding: 0.2rem 0.6rem; border-radius: 12px; margin: 0.2rem; font-size: 0.8rem; }
+        .station-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+        .btn-edit { padding: 0.5rem 0.8rem; border-radius: 6px; border: none; background: #3498DB; color: white; font-size: 0.85rem; cursor: pointer; }
         .btn-delete { padding: 0.5rem 0.8rem; border-radius: 6px; border: none; background: #FF6B6B; color: white; font-size: 0.85rem; cursor: pointer; }
         .login-box { max-width: 400px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
         .login-box h2 { margin-bottom: 1.5rem; }
         .btn-login { background: #00A651; color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; cursor: pointer; width: 100%; }
         .hidden { display: none !important; }
         .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #00A651; color: white; padding: 1rem 2rem; border-radius: 8px; font-weight: bold; z-index: 9999; }
-        .status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; }
-        .badge-available { background: #E8F5E9; color: #00A651; }
-        .badge-limited { background: #FFFDE7; color: #D4A017; }
-        .badge-unavailable { background: #FFEBEE; color: #EF2B2D; }
         #status { padding: 1rem; text-align: center; color: #7F8C8D; font-style: italic; }
+        .edit-mode { border-left: 4px solid #3498DB !important; background: #EBF5FB !important; }
     </style>
 </head>
 <body>
@@ -56,28 +58,33 @@
         <h2>🔐 Connexion Admin</h2>
         <input type="password" id="passwordInput" placeholder="Mot de passe">
         <button class="btn-login" onclick="login()">Se connecter</button>
-<p style="margin-top:1rem;color:#999;font-size:0.9rem;">Contactez l'administrateur pour le mot de passe</p>
+        <p style="margin-top:1rem;color:#999;font-size:0.9rem;">Contactez l'administrateur pour le mot de passe</p>
     </div>
 </div>
 
 <div id="adminBox" class="main hidden">
     <div id="status">Connexion Firebase...</div>
+
     <div class="card">
-        <h2>➕ Ajouter un point de vente</h2>
+        <h2 id="formTitle">➕ Ajouter un point de vente</h2>
         <input type="text" id="nom" placeholder="Nom de la station">
         <input type="text" id="adresse" placeholder="Adresse / Quartier">
-       <input type="tel" id="telephone" placeholder="Téléphone (ex: 70 12 34 56)"> <div class="coords">
+        <input type="tel" id="telephone" placeholder="Téléphone (ex: 70 12 34 56)">
+        <div class="coords">
             <input type="number" id="lat" placeholder="Latitude (ex: 12.37)" step="0.000001">
             <input type="number" id="lng" placeholder="Longitude (ex: -1.52)" step="0.000001">
         </div>
         <div class="hint">💡 Google Maps → Clic droit sur l'endroit → 1ère ligne = coordonnées</div>
-        <select id="statut">
-            <option value="available">✅ Disponible</option>
-            <option value="limited">⚠️ Stock limité</option>
-            <option value="unavailable">❌ Rupture</option>
-        </select>
-        <button class="btn-add" onclick="ajouterStation()">➕ Ajouter la station</button>
+        
+        <div class="brands-section">
+            <h3>📦 Marques et formats disponibles</h3>
+            <div id="brandsContainer"></div>
+        </div>
+
+        <button class="btn-add" id="submitBtn" onclick="ajouterStation()">➕ Ajouter la station</button>
+        <button class="btn-add" id="cancelBtn" onclick="cancelEdit()" style="background:#7F8C8D;margin-top:0.5rem;display:none;">Annuler</button>
     </div>
+
     <div class="card">
         <h2>📋 Gestion des stations</h2>
         <div id="listeStations">
@@ -102,11 +109,115 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
+var editingStationId = null;
+
+var BRANDS = {
+    'sodigaz': { name: 'SODIGAZ', formats: ['3kg', '6kg', '12.5kg', '35kg'] },
+    'total': { name: 'TotalEnergies', formats: ['6kg', '12.5kg', '35kg'] },
+    'oryx': { name: 'Oryx Energy', formats: ['6kg', '12.5kg', '35kg'] },
+    'shell': { name: 'Shell', formats: ['6kg', '12.5kg'] },
+    'pegaz': { name: 'Pégaz', formats: ['6kg', '12.5kg'] },
+    'petrofa': { name: 'Petrofa', formats: ['6kg', '12.5kg', '35kg'] },
+    'ecogaz': { name: 'Ecogaz', formats: ['6kg', '12.5kg'] }
+};
+
+function initBrandsUI() {
+    var container = document.getElementById('brandsContainer');
+    var html = '';
+    
+    for (var brandId in BRANDS) {
+        var brand = BRANDS[brandId];
+        html += '<div class="brand-group">';
+        html += '<div class="brand-name">';
+        html += '<input type="checkbox" id="brand_' + brandId + '" onchange="toggleBrand(\'' + brandId + '\')">';
+        html += '<label for="brand_' + brandId + '">' + brand.name + '</label>';
+        html += '</div>';
+        html += '<div class="formats" id="formats_' + brandId + '" style="display:none;">';
+        
+        for (var i = 0; i < brand.formats.length; i++) {
+            var format = brand.formats[i];
+            html += '<div class="format-option">';
+            html += '<input type="checkbox" id="format_' + brandId + '_' + format.replace('.', '_') + '">';
+            html += '<label>' + format + '</label>';
+            html += '</div>';
+        }
+        
+        html += '</div></div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function toggleBrand(brandId) {
+    var checkbox = document.getElementById('brand_' + brandId);
+    var formatsDiv = document.getElementById('formats_' + brandId);
+    formatsDiv.style.display = checkbox.checked ? 'flex' : 'none';
+    
+    if (!checkbox.checked) {
+        var formats = BRANDS[brandId].formats;
+        for (var i = 0; i < formats.length; i++) {
+            var formatCheckbox = document.getElementById('format_' + brandId + '_' + formats[i].replace('.', '_'));
+            if (formatCheckbox) formatCheckbox.checked = false;
+        }
+    }
+}
+
+function getBrandsData() {
+    var brandsData = {};
+    
+    for (var brandId in BRANDS) {
+        var brandCheckbox = document.getElementById('brand_' + brandId);
+        if (brandCheckbox && brandCheckbox.checked) {
+            brandsData[brandId] = {};
+            var formats = BRANDS[brandId].formats;
+            
+            for (var i = 0; i < formats.length; i++) {
+                var format = formats[i];
+                var formatCheckbox = document.getElementById('format_' + brandId + '_' + format.replace('.', '_'));
+                if (formatCheckbox && formatCheckbox.checked) {
+                    brandsData[brandId][format] = 'available';
+                }
+            }
+            
+            if (Object.keys(brandsData[brandId]).length === 0) {
+                delete brandsData[brandId];
+            }
+        }
+    }
+    
+    return brandsData;
+}
+
+function setBrandsData(brandsData) {
+    for (var brandId in BRANDS) {
+        var brandCheckbox = document.getElementById('brand_' + brandId);
+        var formatsDiv = document.getElementById('formats_' + brandId);
+        
+        if (brandsData && brandsData[brandId]) {
+            brandCheckbox.checked = true;
+            formatsDiv.style.display = 'flex';
+            
+            var formats = BRANDS[brandId].formats;
+            for (var i = 0; i < formats.length; i++) {
+                var format = formats[i];
+                var formatCheckbox = document.getElementById('format_' + brandId + '_' + format.replace('.', '_'));
+                if (formatCheckbox) {
+                    formatCheckbox.checked = brandsData[brandId][format] !== undefined;
+                }
+            }
+        } else {
+            brandCheckbox.checked = false;
+            formatsDiv.style.display = 'none';
+        }
+    }
+}
+
 function login() {
     var pwd = document.getElementById('passwordInput').value;
-   if (pwd === 'GazBF2026!Secure#') {
+    if (pwd === 'GazBF2026!Secure#') {
         document.getElementById('loginBox').classList.add('hidden');
         document.getElementById('adminBox').classList.remove('hidden');
+        initBrandsUI();
         connecterFirebase();
     } else {
         alert('Mot de passe incorrect !');
@@ -134,19 +245,29 @@ function afficherStations(data) {
     var html = '';
     for (var i = 0; i < stations.length; i++) {
         var s = stations[i];
-        var badgeClass = 'badge-' + s.status;
-        var badgeText = s.status === 'available' ? 'Disponible' : s.status === 'limited' ? 'Stock limité' : 'Rupture';
-        html += '<div class="station">';
+        html += '<div class="station' + (editingStationId === s.id ? ' edit-mode' : '') + '">';
         html += '<div class="station-name">' + s.name + '</div>';
-        html += '<span class="status-badge ' + badgeClass + '">' + badgeText + '</span>';
         html += '<div class="station-address">📍 ' + s.address + '</div>';
-       if (s.phone) {
-    html += '<div class="station-phone">📞 <a href="tel:' + s.phone + '">' + s.phone + '</a></div>';
-} html += '<div class="station-btns">';
-        html += '<button class="btn-status btn-available' + (s.status === 'available' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'available\')">✅</button>';
-        html += '<button class="btn-status btn-limited' + (s.status === 'limited' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'limited\')">⚠️</button>';
-        html += '<button class="btn-status btn-unavailable' + (s.status === 'unavailable' ? ' active' : '') + '" onclick="changerStatut(\'' + s.id + '\', \'unavailable\')">❌</button>';
-        html += '<button class="btn-delete" onclick="supprimerStation(\'' + s.id + '\')">🗑️</button>';
+        if (s.phone) {
+            html += '<div class="station-phone">📞 ' + s.phone + '</div>';
+        }
+        
+        if (s.brands) {
+            html += '<div class="station-brands">';
+            for (var brandId in s.brands) {
+                if (BRANDS[brandId]) {
+                    var formats = Object.keys(s.brands[brandId]);
+                    if (formats.length > 0) {
+                        html += '<span class="brand-badge">' + BRANDS[brandId].name + ': ' + formats.join(', ') + '</span>';
+                    }
+                }
+            }
+            html += '</div>';
+        }
+        
+        html += '<div class="station-btns">';
+        html += '<button class="btn-edit" onclick="editStation(\'' + s.id + '\')">✏️ Modifier</button>';
+        html += '<button class="btn-delete" onclick="supprimerStation(\'' + s.id + '\')">🗑️ Supprimer</button>';
         html += '</div></div>';
     }
     container.innerHTML = html;
@@ -155,42 +276,118 @@ function afficherStations(data) {
 function ajouterStation() {
     var nom = document.getElementById('nom').value.trim();
     var adresse = document.getElementById('adresse').value.trim();
-    var telephone = document.getElementById('telephone').value.trim();var lat = parseFloat(document.getElementById('lat').value);
+    var telephone = document.getElementById('telephone').value.trim();
+    var lat = parseFloat(document.getElementById('lat').value);
     var lng = parseFloat(document.getElementById('lng').value);
-    var statut = document.getElementById('statut').value;
-    if (!nom || !adresse) { alert('Remplissez le nom et l\'adresse !'); return; }
-    if (isNaN(lat) || isNaN(lng)) { alert('Coordonnées invalides !'); return; }
-    var id = 'station_' + Date.now();
-    var station = {
-    id: id,
-    name: nom,
-    address: adresse,
-    phone: telephone,
-    lat: lat,
-    lng: lng,
-    status: statut,
-    updatedAt: Date.now()
-};
-    db.ref('stations/' + id).set(station).then(function() {
-        afficherToast('✅ Station ajoutée !');
-        document.getElementById('nom').value = '';
-        document.getElementById('adresse').value = '';
-        document.getElementById('lat').value = '';
-        document.getElementById('lng').value = '';
-    }).catch(function(error) { alert('Erreur: ' + error.message); });
+    var brands = getBrandsData();
+
+    if (!nom || !adresse) {
+        alert('Remplissez le nom et l\'adresse !');
+        return;
+    }
+    if (isNaN(lat) || isNaN(lng)) {
+        alert('Coordonnées invalides !');
+        return;
+    }
+    if (Object.keys(brands).length === 0) {
+        alert('Sélectionnez au moins une marque et un format !');
+        return;
+    }
+
+    if (editingStationId) {
+        var updates = {
+            name: nom,
+            address: adresse,
+            phone: telephone,
+            lat: lat,
+            lng: lng,
+            brands: brands,
+            updatedAt: Date.now()
+        };
+        db.ref('stations/' + editingStationId).update(updates).then(function() {
+            afficherToast('✅ Station mise à jour !');
+            resetForm();
+        }).catch(function(error) {
+            alert('Erreur: ' + error.message);
+        });
+    } else {
+        var id = 'station_' + Date.now();
+        var station = {
+            id: id,
+            name: nom,
+            address: adresse,
+            phone: telephone,
+            lat: lat,
+            lng: lng,
+            brands: brands,
+            updatedAt: Date.now()
+        };
+        db.ref('stations/' + id).set(station).then(function() {
+            afficherToast('✅ Station ajoutée !');
+            resetForm();
+        }).catch(function(error) {
+            alert('Erreur: ' + error.message);
+        });
+    }
 }
 
-function changerStatut(id, statut) {
-    db.ref('stations/' + id).update({ status: statut, updatedAt: Date.now() })
-    .then(function() { afficherToast('✅ Statut mis à jour !'); })
-    .catch(function(e) { alert('Erreur: ' + e.message); });
+function editStation(id) {
+    db.ref('stations/' + id).once('value').then(function(snapshot) {
+        var s = snapshot.val();
+        document.getElementById('nom').value = s.name;
+        document.getElementById('adresse').value = s.address;
+        document.getElementById('telephone').value = s.phone || '';
+        document.getElementById('lat').value = s.lat;
+        document.getElementById('lng').value = s.lng;
+        
+        setBrandsData(s.brands);
+        
+        editingStationId = id;
+        document.getElementById('formTitle').textContent = '✏️ Modifier la station';
+        document.getElementById('submitBtn').textContent = '💾 Mettre à jour';
+        document.getElementById('cancelBtn').style.display = 'block';
+        
+        window.scrollTo(0, 0);
+        afficherStations(null);
+        db.ref('stations').once('value').then(function(snap) {
+            afficherStations(snap.val());
+        });
+    });
+}
+
+function cancelEdit() {
+    resetForm();
+}
+
+function resetForm() {
+    editingStationId = null;
+    document.getElementById('nom').value = '';
+    document.getElementById('adresse').value = '';
+    document.getElementById('telephone').value = '';
+    document.getElementById('lat').value = '';
+    document.getElementById('lng').value = '';
+    
+    for (var brandId in BRANDS) {
+        var brandCheckbox = document.getElementById('brand_' + brandId);
+        if (brandCheckbox) brandCheckbox.checked = false;
+        toggleBrand(brandId);
+    }
+    
+    document.getElementById('formTitle').textContent = '➕ Ajouter un point de vente';
+    document.getElementById('submitBtn').textContent = '➕ Ajouter la station';
+    document.getElementById('cancelBtn').style.display = 'none';
 }
 
 function supprimerStation(id) {
     if (confirm('Supprimer cette station ?')) {
-        db.ref('stations/' + id).remove()
-        .then(function() { afficherToast('✅ Station supprimée !'); })
-        .catch(function(e) { alert('Erreur: ' + e.message); });
+        db.ref('stations/' + id).remove().then(function() {
+            afficherToast('✅ Station supprimée !');
+            if (editingStationId === id) {
+                resetForm();
+            }
+        }).catch(function(e) {
+            alert('Erreur: ' + e.message);
+        });
     }
 }
 

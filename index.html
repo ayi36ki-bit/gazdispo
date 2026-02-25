@@ -5,10 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00A651">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>GazDispo - Trouvez du gaz au Burkina Faso</title>
+    <title>GazDispo - Votre gaz sans galère</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .filters { background: white; padding: 1rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .filters-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.8rem; align-items: end; }
+        .filter-group label { display: block; font-size: 0.85rem; color: #7F8C8D; margin-bottom: 0.3rem; font-weight: 500; }
+        .filter-group select { width: 100%; padding: 0.8rem; border: 2px solid #E0E0E0; border-radius: 8px; font-size: 0.95rem; background: white; }
+        .filter-group select:focus { outline: none; border-color: #00A651; }
+        .btn-filter { background: #00A651; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-filter:hover { background: #008C45; }
+        .btn-reset { background: #7F8C8D; color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; margin-left: 0.5rem; }
+        .brands-display { margin: 0.8rem 0; }
+        .brand-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #ECF0F1; }
+        .brand-item:last-child { border-bottom: none; }
+        .brand-name-display { font-weight: 600; color: #2C3E50; font-size: 0.9rem; }
+        .brand-formats { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .format-badge { background: #E8F5E9; color: #00A651; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+        .no-brands { color: #95A5A6; font-style: italic; font-size: 0.85rem; text-align: center; padding: 1rem; }
+        @media (max-width: 640px) {
+            .filters-row { grid-template-columns: 1fr; }
+            .btn-filter, .btn-reset { width: 100%; margin: 0.5rem 0 0 0; }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -39,24 +60,44 @@
                     <span id="lastUpdateTime">--:--</span>
                 </div>
             </div>
+
+            <div class="filters">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="brandFilter">🏷️ Marque</label>
+                        <select id="brandFilter">
+                            <option value="">Toutes les marques</option>
+                            <option value="sodigaz">SODIGAZ</option>
+                            <option value="total">TotalEnergies</option>
+                            <option value="oryx">Oryx Energy</option>
+                            <option value="shell">Shell</option>
+                            <option value="pegaz">Pégaz</option>
+                            <option value="petrofa">Petrofa</option>
+                            <option value="ecogaz">Ecogaz</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="formatFilter">📦 Format</label>
+                        <select id="formatFilter">
+                            <option value="">Tous les formats</option>
+                            <option value="3kg">3 kg</option>
+                            <option value="6kg">6 kg</option>
+                            <option value="12.5kg">12,5 kg</option>
+                            <option value="35kg">35 kg</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn-filter" onclick="applyFilters()">🔍 Rechercher</button>
+                        <button class="btn-reset" onclick="resetFilters()">✖️</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="search-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un quartier...">
                 <span class="search-icon">🔍</span>
             </div>
-            <div class="legend">
-                <div class="legend-item">
-                    <span class="status-dot available"></span>
-                    <span id="legendAvailable">Disponible</span>
-                </div>
-                <div class="legend-item">
-                    <span class="status-dot limited"></span>
-                    <span id="legendLimited">Stock limité</span>
-                </div>
-                <div class="legend-item">
-                    <span class="status-dot unavailable"></span>
-                    <span id="legendUnavailable">Rupture</span>
-                </div>
-            </div>
+            
             <div id="stationsList" class="stations-list">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -66,18 +107,278 @@
         </div>
     </main>
 
-    <a href="admin.html" class="admin-btn">⚙️</a>
-
     <div id="offlineIndicator" class="offline-indicator hidden">
         <span>📡 Mode hors ligne</span>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="firebase-app.js"></script>
-<script src="firebase-database.js"></script>
-    <!-- Leaflet -->
+    <script src="firebase-database.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- App -->
-    <script src="app.js"></script>
+    <script>
+var map;
+var markers = [];
+var allStations = [];
+var filteredStations = [];
+var currentLang = 'fr';
+var db;
+
+var BRANDS = {
+    'sodigaz': 'SODIGAZ',
+    'total': 'TotalEnergies',
+    'oryx': 'Oryx Energy',
+    'shell': 'Shell',
+    'pegaz': 'Pégaz',
+    'petrofa': 'Petrofa',
+    'ecogaz': 'Ecogaz'
+};
+
+var translations = {
+    fr: {
+        updatedAt: "Mis à jour il y a",
+        minutes: "min",
+        hours: "h",
+        noStations: "Aucun point de vente trouvé"
+    },
+    moore: {
+        updatedAt: "Yãmb sã",
+        minutes: "minit",
+        hours: "wakat",
+        noStations: "Gaz yõodo tɩ be"
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                apiKey: "AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
+                authDomain: "gazdispo-5a9b1.firebaseapp.com",
+                databaseURL: "https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "gazdispo-5a9b1",
+                storageBucket: "gazdispo-5a9b1.firebasestorage.app",
+                messagingSenderId: "815895848815",
+                appId: "1:815895848815:web:d6fdc94accc1f670ac6a9a"
+            });
+        }
+        db = firebase.database();
+        console.log('✅ Firebase OK!');
+    } catch(e) {
+        console.error('❌ Erreur Firebase:', e);
+    }
+
+    currentLang = localStorage.getItem('gazdispo_lang') || 'fr';
+    var langSelector = document.getElementById('languageSelector');
+    if (langSelector) langSelector.value = currentLang;
+
+    initMap();
+    loadStations();
+
+    var searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            var query = e.target.value.toLowerCase();
+            var filtered = filteredStations.filter(function(s) {
+                return s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query);
+            });
+            afficherStations(filtered);
+            updateMap(filtered);
+        });
+    }
+
+    var refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            loadStations();
+        });
+    }
+
+    var langSel = document.getElementById('languageSelector');
+    if (langSel) {
+        langSel.addEventListener('change', function(e) {
+            currentLang = e.target.value;
+            localStorage.setItem('gazdispo_lang', currentLang);
+            afficherStations(filteredStations);
+        });
+    }
+});
+
+function initMap() {
+    map = L.map('map').setView([12.3714, -1.5197], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+}
+
+function loadStations() {
+    if (!db) {
+        console.error('Firebase non initialisé');
+        return;
+    }
+
+    console.log('Chargement des stations...');
+
+    db.ref('stations').on('value', function(snapshot) {
+        var data = snapshot.val();
+
+        if (data) {
+            allStations = Object.values(data);
+            filteredStations = allStations;
+            console.log('✅ Stations:', allStations.length);
+        } else {
+            console.log('Aucune station');
+            allStations = [];
+            filteredStations = [];
+        }
+
+        applyFilters();
+
+        var now = new Date();
+        var timeEl = document.getElementById('lastUpdateTime');
+        if (timeEl) {
+            timeEl.textContent = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+        }
+
+        localStorage.setItem('gazdispo_cache', JSON.stringify(allStations));
+    });
+}
+
+function applyFilters() {
+    var brandFilter = document.getElementById('brandFilter').value;
+    var formatFilter = document.getElementById('formatFilter').value;
+
+    filteredStations = allStations.filter(function(s) {
+        if (!brandFilter && !formatFilter) return true;
+        if (!s.brands) return false;
+
+        if (brandFilter && formatFilter) {
+            return s.brands[brandFilter] && s.brands[brandFilter][formatFilter];
+        } else if (brandFilter) {
+            return s.brands[brandFilter] !== undefined;
+        } else if (formatFilter) {
+            for (var brand in s.brands) {
+                if (s.brands[brand][formatFilter]) return true;
+            }
+            return false;
+        }
+
+        return true;
+    });
+
+    afficherStations(filteredStations);
+    updateMap(filteredStations);
+}
+
+function resetFilters() {
+    document.getElementById('brandFilter').value = '';
+    document.getElementById('formatFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    filteredStations = allStations;
+    afficherStations(filteredStations);
+    updateMap(filteredStations);
+}
+
+function afficherStations(liste) {
+    var container = document.getElementById('stationsList');
+    if (!container) return;
+
+    var t = translations[currentLang];
+
+    if (liste.length === 0) {
+        container.innerHTML = '<p style="text-align:center;padding:2rem;color:#999;">' + t.noStations + '</p>';
+        return;
+    }
+
+    var html = '';
+    for (var i = 0; i < liste.length; i++) {
+        var s = liste[i];
+        var diff = Date.now() - s.updatedAt;
+        var timeAgo = Math.floor(diff / 60000) + ' ' + t.minutes;
+        if (diff > 3600000) timeAgo = Math.floor(diff / 3600000) + ' ' + t.hours;
+
+        html += '<div class="station-card" onclick="focusStation(\'' + s.id + '\')">';
+        html += '<div class="station-header">';
+        html += '<div class="station-name">' + s.name + '</div>';
+        html += '</div>';
+        html += '<div class="station-address">📍 ' + s.address + '</div>';
+        
+        if (s.phone) {
+            html += '<div class="station-phone"><a href="tel:' + s.phone + '" style="color:#00A651;text-decoration:none;" onclick="event.stopPropagation()">📞 ' + s.phone + '</a></div>';
+        }
+
+        if (s.brands && Object.keys(s.brands).length > 0) {
+            html += '<div class="brands-display">';
+            for (var brandId in s.brands) {
+                if (BRANDS[brandId]) {
+                    var formats = Object.keys(s.brands[brandId]);
+                    if (formats.length > 0) {
+                        html += '<div class="brand-item">';
+                        html += '<span class="brand-name-display">' + BRANDS[brandId] + '</span>';
+                        html += '<div class="brand-formats">';
+                        for (var j = 0; j < formats.length; j++) {
+                            html += '<span class="format-badge">' + formats[j] + '</span>';
+                        }
+                        html += '</div></div>';
+                    }
+                }
+            }
+            html += '</div>';
+        } else {
+            html += '<div class="no-brands">Informations de stock non disponibles</div>';
+        }
+
+        html += '<div class="station-updated">' + t.updatedAt + ' ' + timeAgo + '</div>';
+        html += '</div>';
+    }
+    container.innerHTML = html;
+}
+
+function updateMap(liste) {
+    markers.forEach(function(m) { map.removeLayer(m); });
+    markers = [];
+
+    liste.forEach(function(s) {
+        var color = '#00A651';
+
+        var marker = L.marker([s.lat, s.lng], {
+            icon: L.divIcon({
+                className: '',
+                html: '<div style="background:' + color + ';width:28px;height:28px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+                iconSize: [28, 28]
+            })
+        }).addTo(map);
+
+        var popupHtml = '<strong>' + s.name + '</strong><br>' + s.address;
+        if (s.phone) {
+            popupHtml += '<br>📞 ' + s.phone;
+        }
+        if (s.brands) {
+            popupHtml += '<br><br>';
+            for (var brandId in s.brands) {
+                if (BRANDS[brandId]) {
+                    var formats = Object.keys(s.brands[brandId]);
+                    if (formats.length > 0) {
+                        popupHtml += '<strong>' + BRANDS[brandId] + ':</strong> ' + formats.join(', ') + '<br>';
+                    }
+                }
+            }
+        }
+
+        marker.bindPopup(popupHtml);
+        markers.push(marker);
+    });
+}
+
+function focusStation(id) {
+    var s = filteredStations.find(function(st) { return st.id === id; });
+    if (s) {
+        map.setView([s.lat, s.lng], 15);
+        markers.forEach(function(m) {
+            if (m.getLatLng().lat === s.lat && m.getLatLng().lng === s.lng) {
+                m.openPopup();
+            }
+        });
+    }
+}
+    </script>
 </body>
 </html>

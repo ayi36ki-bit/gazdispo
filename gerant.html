@@ -53,7 +53,7 @@
         <div class="hint">
             ℹ️ Entrez le code fourni par l'administrateur GazDispo
         </div>
-        <input type="text" id="codeInput" placeholder="Code de votre station (ex: tampouy)" autocomplete="off">
+        <input type="text" id="codeInput" placeholder="Votre code (ex: station_1771863010190)" autocomplete="off">
         <button class="btn" onclick="login()">Se connecter</button>
     </div>
 
@@ -80,46 +80,24 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 var currentStation = null;
-var currentCode = null;
-
-var gerantCodes = {
-    'tampouy': 'station_1771863010190',
-    'station1': 'station_1771863084970',
-    'station2': 'station_1771863177801',
-    'station3': 'station_1771863366401',
-    'station4': 'station_1771863573117',
-    'station5': 'station_1771863704637',
-    'station6': 'station_1771863792062',
-    'station7': 'station_1771878000375',
-    'station8': 'station_1771934283037'
-};
 
 function login() {
-    var code = document.getElementById('codeInput').value.trim().toLowerCase();
-    
-    if (!code) {
-        showToast('Veuillez entrer un code', true);
-        return;
-    }
-    
-    var stationId = gerantCodes[code];
+    var stationId = document.getElementById('codeInput').value.trim();
     
     if (!stationId) {
-        showToast('Code invalide. Contactez administrateur.', true);
+        showToast('Veuillez entrer votre code', true);
         return;
     }
-    
-    currentCode = code;
     
     db.ref('stations/' + stationId).once('value').then(function(snapshot) {
         if (snapshot.exists()) {
             currentStation = snapshot.val();
             showDashboard();
         } else {
-            showToast('Station non trouvée.', true);
+            showToast('Code invalide ou station introuvable.', true);
         }
     }).catch(function(error) {
-        showToast('Erreur de connexion', true);
+        showToast('Erreur de connexion: ' + error.message, true);
     });
 }
 
@@ -176,7 +154,6 @@ function updateStatus(newStatus) {
 
 function logout() {
     currentStation = null;
-    currentCode = null;
     document.getElementById('loginBox').classList.remove('hidden');
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('codeInput').value = '';

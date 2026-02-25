@@ -160,7 +160,9 @@ function afficherStations(liste) {
         html += '<span class="status-dot ' + s.status + '"></span>' + statusText;
         html += '</div></div>';
         html += '<div class="station-address">📍 ' + s.address + '</div>';
-        html += '<div class="station-updated">' + t.updatedAt + ' ' + timeAgo + '</div>';
+       if (s.phone) {
+    html += '<div class="station-phone">📞 <a href="tel:' + s.phone + '" style="color:#00A651;text-decoration:none;">' + s.phone + '</a></div>';
+} html += '<div class="station-updated">' + t.updatedAt + ' ' + timeAgo + '</div>';
         html += '</div>';
     }
     container.innerHTML = html;
