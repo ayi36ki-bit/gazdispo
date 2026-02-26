@@ -1,0 +1,121 @@
+// Fichier des traductions pour GazDispo
+const translations = {
+    fr: {
+        appName: "GazDispo",
+        tagline: "Votre gaz sans galère",
+        availableStations: "Points de vente",
+        lastUpdate: "Mis à jour",
+        search: "Rechercher un quartier...",
+        brand: "Marque",
+        format: "Format",
+        allBrands: "Toutes les marques",
+        allFormats: "Tous les formats",
+        available: "Disponible",
+        unavailable: "Rupture",
+        call: "Appeler",
+        directions: "Itinéraire",
+        noResults: "Aucun point de vente trouvé",
+        loading: "Chargement...",
+        refresh: "Actualiser",
+        filter: "Filtrer",
+        reset: "Réinitialiser",
+        // Admin
+        adminTitle: "Administration",
+        addStation: "Ajouter un point de vente",
+        stationName: "Nom de la station",
+        address: "Adresse / Quartier",
+        phone: "Téléphone",
+        save: "Enregistrer",
+        cancel: "Annuler",
+        delete: "Supprimer",
+        edit: "Modifier",
+        // Gérant
+        managerAccess: "Accès Gérant",
+        enterCode: "Entrez votre code",
+        login: "Se connecter",
+        logout: "Déconnexion",
+        updateStatus: "Mettre à jour le statut",
+        saveChanges: "Sauvegarder les modifications"
+    },
+    
+    moore: {
+        appName: "GazDispo",
+        tagline: "A gaz tɩ kelg rãmba",
+        availableStations: "Gaz yõodo",
+        lastUpdate: "Yãmb sã",
+        search: "Kõs zak...",
+        brand: "Tõogo",
+        format: "Kãnga",
+        allBrands: "Tõos kãnga",
+        allFormats: "Kãngs kãnga",
+        available: "A be",
+        unavailable: "A tɩ be",
+        call: "Wẽe",
+        directions: "Sõor",
+        noResults: "Gaz yõodo tɩ be",
+        loading: "A zoe",
+        refresh: "Yãmb",
+        filter: "Seb",
+        reset: "Zugd",
+        // Admin
+        adminTitle: "Gũusum",
+        addStation: "Tõe gaz yõodo",
+        stationName: "Yõod yuur",
+        address: "Zak",
+        phone: "Telefɔɔn",
+        save: "Kõs",
+        cancel: "Ka",
+        delete: "Ku",
+        edit: "Yãk",
+        // Gérant
+        managerAccess: "Yir soba sõng",
+        enterCode: "Tõe a kood",
+        login: "Dɔɔg",
+        logout: "Zaood",
+        updateStatus: "Yãmb tɩ sõama",
+        saveChanges: "Kõs tɩ yãkame"
+    },
+    
+    en: {
+        appName: "GazDispo",
+        tagline: "Your gas without hassle",
+        availableStations: "Outlets",
+        lastUpdate: "Updated",
+        search: "Search area...",
+        brand: "Brand",
+        format: "Size",
+        allBrands: "All brands",
+        allFormats: "All sizes",
+        available: "Available",
+        unavailable: "Out of stock",
+        call: "Call",
+        directions: "Directions",
+        noResults: "No outlets found",
+        loading: "Loading...",
+        refresh: "Refresh",
+        filter: "Filter",
+        reset: "Reset",
+        // Admin
+        adminTitle: "Administration",
+        addStation: "Add outlet",
+        stationName: "Station name",
+        address: "Address / Area",
+        phone: "Phone",
+        save: "Save",
+        cancel: "Cancel",
+        delete: "Delete",
+        edit: "Edit",
+        // Gérant
+        managerAccess: "Manager Access",
+        enterCode: "Enter your code",
+        login: "Login",
+        logout: "Logout",
+        updateStatus: "Update status",
+        saveChanges: "Save changes"
+    }
+};
+
+// Exporter pour utilisation
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = translations;
+}

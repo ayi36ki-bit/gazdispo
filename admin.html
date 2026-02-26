@@ -23,17 +23,22 @@
         .brands-section { background: #F8F9FA; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; }
         .brands-section h3 { font-size: 1rem; color: #2C3E50; margin-bottom: 0.8rem; }
         .brand-group { background: white; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.8rem; border-left: 3px solid #00A651; }
-        .brand-name { font-weight: bold; color: #2C3E50; margin-bottom: 0.5rem; display: flex; align-items: center; }
-        .brand-name input[type="checkbox"] { margin-right: 0.5rem; width: auto; }
-        .formats { display: flex; gap: 1rem; flex-wrap: wrap; margin-left: 1.5rem; }
-        .format-option { display: flex; align-items: center; gap: 0.3rem; }
-        .format-option input[type="checkbox"] { width: auto; margin: 0; }
+        .brand-name { font-weight: bold; color: #2C3E50; margin-bottom: 0.8rem; font-size: 1rem; }
+        .format-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; padding: 0.8rem; background: #F8F9FA; border-radius: 8px; }
+        .format-row input[type="checkbox"] { width: 20px; height: 20px; margin: 0; cursor: pointer; }
+        .format-row .format-label { min-width: 80px; font-weight: 600; font-size: 1.1rem; color: #2C3E50; }
+        .status-toggle { display: flex; gap: 0.5rem; }
+        .status-toggle label { display: flex; align-items: center; gap: 0.3rem; padding: 0.5rem 1rem; background: white; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+        .status-toggle input[type="radio"] { width: 18px; height: 18px; margin: 0; cursor: pointer; }
+        .status-toggle input[type="radio"]:checked + span { color: #00A651; }
         .station { background: #FAFAFA; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 4px solid #00A651; }
         .station-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 0.3rem; }
         .station-address { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 0.3rem; }
         .station-phone { color: #00A651; font-size: 0.9rem; margin-bottom: 0.8rem; }
-        .station-brands { margin: 0.8rem 0; font-size: 0.85rem; }
-        .brand-badge { display: inline-block; background: #E8F5E9; color: #00A651; padding: 0.2rem 0.6rem; border-radius: 12px; margin: 0.2rem; font-size: 0.8rem; }
+        .station-brands { margin: 0.8rem 0; font-size: 0.9rem; }
+        .brand-badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 15px; margin: 0.2rem; font-size: 0.9rem; font-weight: 600; }
+        .badge-available { background: #E8F5E9; color: #00A651; }
+        .badge-unavailable { background: #FFEBEE; color: #EF2B2D; }
         .station-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
         .btn-edit { padding: 0.5rem 0.8rem; border-radius: 6px; border: none; background: #3498DB; color: white; font-size: 0.85rem; cursor: pointer; }
         .btn-delete { padding: 0.5rem 0.8rem; border-radius: 6px; border: none; background: #FF6B6B; color: white; font-size: 0.85rem; cursor: pointer; }
@@ -43,7 +48,6 @@
         .hidden { display: none !important; }
         .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #00A651; color: white; padding: 1rem 2rem; border-radius: 8px; font-weight: bold; z-index: 9999; }
         #status { padding: 1rem; text-align: center; color: #7F8C8D; font-style: italic; }
-        .edit-mode { border-left: 4px solid #3498DB !important; background: #EBF5FB !important; }
     </style>
 </head>
 <body>
@@ -58,7 +62,7 @@
         <h2>🔐 Connexion Admin</h2>
         <input type="password" id="passwordInput" placeholder="Mot de passe">
         <button class="btn-login" onclick="login()">Se connecter</button>
-        <p style="margin-top:1rem;color:#999;font-size:0.9rem;">Contactez l'administrateur pour le mot de passe</p>
+        <p style="margin-top:1rem;color:#999;font-size:0.9rem;">Contactez l'administrateur</p>
     </div>
 </div>
 
@@ -74,7 +78,7 @@
             <input type="number" id="lat" placeholder="Latitude (ex: 12.37)" step="0.000001">
             <input type="number" id="lng" placeholder="Longitude (ex: -1.52)" step="0.000001">
         </div>
-        <div class="hint">💡 Google Maps → Clic droit sur l'endroit → 1ère ligne = coordonnées</div>
+        <div class="hint">💡 Google Maps → Clic droit → Copier les coordonnées</div>
         
         <div class="brands-section">
             <h3>📦 Marques et formats disponibles</h3>
@@ -86,10 +90,8 @@
     </div>
 
     <div class="card">
-        <h2>📋 Gestion des stations</h2>
-        <div id="listeStations">
-            <p style="text-align:center;padding:1rem;color:#999;">Chargement...</p>
-        </div>
+        <h2>📋 Gestion des stations (<span id="stationCount">0</span>)</h2>
+        <div id="listeStations"><p style="text-align:center;padding:1rem;color:#999;">Chargement...</p></div>
     </div>
 </div>
 
@@ -97,7 +99,7 @@
 <script src="firebase-database.js"></script>
 
 <script>
-var firebaseConfig = {
+firebase.initializeApp({
     apiKey: "AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
     authDomain: "gazdispo-5a9b1.firebaseapp.com",
     databaseURL: "https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
@@ -105,109 +107,87 @@ var firebaseConfig = {
     storageBucket: "gazdispo-5a9b1.firebasestorage.app",
     messagingSenderId: "815895848815",
     appId: "1:815895848815:web:d6fdc94accc1f670ac6a9a"
-};
-firebase.initializeApp(firebaseConfig);
+});
 var db = firebase.database();
-
 var editingStationId = null;
 
 var BRANDS = {
-    'sodigaz': { name: 'SODIGAZ', formats: ['3kg', '6kg', '12.5kg', '35kg'] },
-    'total': { name: 'TotalEnergies', formats: ['6kg', '12.5kg', '35kg'] },
-    'oryx': { name: 'Oryx Energy', formats: ['6kg', '12.5kg', '35kg'] },
-    'shell': { name: 'Shell', formats: ['6kg', '12.5kg'] },
-    'pegaz': { name: 'Pégaz', formats: ['6kg', '12.5kg'] },
-    'petrofa': { name: 'Petrofa', formats: ['6kg', '12.5kg', '35kg'] },
-    'ecogaz': { name: 'Ecogaz', formats: ['6kg', '12.5kg'] }
+    'sodigaz': { name: 'SODIGAZ', formats: ['3kg', '6kg', '12kg', '35kg'] },
+    'total': { name: 'TotalEnergies', formats: ['6kg', '12kg', '35kg'] },
+    'oryx': { name: 'Oryx Energy', formats: ['6kg', '12kg', '35kg'] },
+    'shell': { name: 'Shell', formats: ['6kg', '12kg'] },
+    'pegaz': { name: 'Pégaz', formats: ['6kg', '12kg'] },
+    'petrofa': { name: 'Petrofa', formats: ['6kg', '12kg', '35kg'] },
+    'ecogaz': { name: 'Ecogaz', formats: ['6kg', '12kg'] }
 };
 
 function initBrandsUI() {
-    var container = document.getElementById('brandsContainer');
     var html = '';
-    
     for (var brandId in BRANDS) {
         var brand = BRANDS[brandId];
-        html += '<div class="brand-group">';
-        html += '<div class="brand-name">';
-        html += '<input type="checkbox" id="brand_' + brandId + '" onchange="toggleBrand(\'' + brandId + '\')">';
-        html += '<label for="brand_' + brandId + '">' + brand.name + '</label>';
-        html += '</div>';
-        html += '<div class="formats" id="formats_' + brandId + '" style="display:none;">';
-        
+        html += '<div class="brand-group"><div class="brand-name">' + brand.name + '</div>';
         for (var i = 0; i < brand.formats.length; i++) {
             var format = brand.formats[i];
-            html += '<div class="format-option">';
-            html += '<input type="checkbox" id="format_' + brandId + '_' + format.replace('.', '_') + '">';
-            html += '<label>' + format + '</label>';
-            html += '</div>';
+            var formatId = brandId + '_' + format;
+            html += '<div class="format-row">';
+            html += '<input type="checkbox" id="check_' + formatId + '" onchange="toggleFormat(\'' + formatId + '\')">';
+            html += '<span class="format-label">' + format + '</span>';
+            html += '<div class="status-toggle" id="status_' + formatId + '" style="display:none;">';
+            html += '<label><input type="radio" name="radio_' + formatId + '" value="available" checked><span>Disponible</span></label>';
+            html += '<label><input type="radio" name="radio_' + formatId + '" value="unavailable"><span>Rupture</span></label>';
+            html += '</div></div>';
         }
-        
-        html += '</div></div>';
+        html += '</div>';
     }
-    
-    container.innerHTML = html;
+    document.getElementById('brandsContainer').innerHTML = html;
 }
 
-function toggleBrand(brandId) {
-    var checkbox = document.getElementById('brand_' + brandId);
-    var formatsDiv = document.getElementById('formats_' + brandId);
-    formatsDiv.style.display = checkbox.checked ? 'flex' : 'none';
-    
-    if (!checkbox.checked) {
-        var formats = BRANDS[brandId].formats;
-        for (var i = 0; i < formats.length; i++) {
-            var formatCheckbox = document.getElementById('format_' + brandId + '_' + formats[i].replace('.', '_'));
-            if (formatCheckbox) formatCheckbox.checked = false;
-        }
-    }
+function toggleFormat(formatId) {
+    var checkbox = document.getElementById('check_' + formatId);
+    var statusDiv = document.getElementById('status_' + formatId);
+    statusDiv.style.display = checkbox.checked ? 'flex' : 'none';
 }
 
 function getBrandsData() {
     var brandsData = {};
-    
     for (var brandId in BRANDS) {
-        var brandCheckbox = document.getElementById('brand_' + brandId);
-        if (brandCheckbox && brandCheckbox.checked) {
-            brandsData[brandId] = {};
-            var formats = BRANDS[brandId].formats;
-            
-            for (var i = 0; i < formats.length; i++) {
-                var format = formats[i];
-                var formatCheckbox = document.getElementById('format_' + brandId + '_' + format.replace('.', '_'));
-                if (formatCheckbox && formatCheckbox.checked) {
-                    brandsData[brandId][format] = 'available';
+        for (var i = 0; i < BRANDS[brandId].formats.length; i++) {
+            var format = BRANDS[brandId].formats[i];
+            var formatId = brandId + '_' + format;
+            var checkbox = document.getElementById('check_' + formatId);
+            if (checkbox && checkbox.checked) {
+                if (!brandsData[brandId]) brandsData[brandId] = {};
+                var radios = document.getElementsByName('radio_' + formatId);
+                var status = 'available';
+                for (var j = 0; j < radios.length; j++) {
+                    if (radios[j].checked) { status = radios[j].value; break; }
                 }
-            }
-            
-            if (Object.keys(brandsData[brandId]).length === 0) {
-                delete brandsData[brandId];
+                brandsData[brandId][format] = status;
             }
         }
     }
-    
     return brandsData;
 }
 
 function setBrandsData(brandsData) {
     for (var brandId in BRANDS) {
-        var brandCheckbox = document.getElementById('brand_' + brandId);
-        var formatsDiv = document.getElementById('formats_' + brandId);
-        
-        if (brandsData && brandsData[brandId]) {
-            brandCheckbox.checked = true;
-            formatsDiv.style.display = 'flex';
-            
-            var formats = BRANDS[brandId].formats;
-            for (var i = 0; i < formats.length; i++) {
-                var format = formats[i];
-                var formatCheckbox = document.getElementById('format_' + brandId + '_' + format.replace('.', '_'));
-                if (formatCheckbox) {
-                    formatCheckbox.checked = brandsData[brandId][format] !== undefined;
+        for (var i = 0; i < BRANDS[brandId].formats.length; i++) {
+            var format = BRANDS[brandId].formats[i];
+            var formatId = brandId + '_' + format;
+            var checkbox = document.getElementById('check_' + formatId);
+            var statusDiv = document.getElementById('status_' + formatId);
+            if (brandsData && brandsData[brandId] && brandsData[brandId][format]) {
+                checkbox.checked = true;
+                statusDiv.style.display = 'flex';
+                var status = brandsData[brandId][format];
+                var radios = document.getElementsByName('radio_' + formatId);
+                for (var j = 0; j < radios.length; j++) {
+                    radios[j].checked = (radios[j].value === status);
                 }
+            } else {
+                checkbox.checked = false;
+                statusDiv.style.display = 'none';
             }
-        } else {
-            brandCheckbox.checked = false;
-            formatsDiv.style.display = 'none';
         }
     }
 }
@@ -219,55 +199,49 @@ function login() {
         document.getElementById('adminBox').classList.remove('hidden');
         initBrandsUI();
         connecterFirebase();
-    } else {
-        alert('Mot de passe incorrect !');
-    }
+    } else { alert('Mot de passe incorrect !'); }
 }
 
 function connecterFirebase() {
-    document.getElementById('status').textContent = 'Connexion Firebase...';
+    document.getElementById('status').textContent = 'Connexion...';
     db.ref('stations').on('value', function(snapshot) {
-        document.getElementById('status').textContent = '✅ Firebase connecté !';
-        var data = snapshot.val();
-        afficherStations(data);
-    }, function(error) {
-        document.getElementById('status').textContent = '❌ Erreur: ' + error.message;
+        document.getElementById('status').textContent = '✅ Connecté !';
+        afficherStations(snapshot.val());
     });
 }
 
 function afficherStations(data) {
     var container = document.getElementById('listeStations');
     if (!data) {
-        container.innerHTML = '<p style="text-align:center;padding:1rem;color:#999;">Aucune station. Ajoutez-en une !</p>';
+        container.innerHTML = '<p style="text-align:center;padding:1rem;color:#999;">Aucune station</p>';
+        document.getElementById('stationCount').textContent = '0';
         return;
     }
     var stations = Object.values(data);
+    document.getElementById('stationCount').textContent = stations.length;
     var html = '';
     for (var i = 0; i < stations.length; i++) {
         var s = stations[i];
-        html += '<div class="station' + (editingStationId === s.id ? ' edit-mode' : '') + '">';
-        html += '<div class="station-name">' + s.name + '</div>';
+        html += '<div class="station"><div class="station-name">' + s.name + '</div>';
         html += '<div class="station-address">📍 ' + s.address + '</div>';
-        if (s.phone) {
-            html += '<div class="station-phone">📞 ' + s.phone + '</div>';
-        }
-        
+        if (s.phone) html += '<div class="station-phone">📞 ' + s.phone + '</div>';
         if (s.brands) {
             html += '<div class="station-brands">';
             for (var brandId in s.brands) {
                 if (BRANDS[brandId]) {
-                    var formats = Object.keys(s.brands[brandId]);
-                    if (formats.length > 0) {
-                        html += '<span class="brand-badge">' + BRANDS[brandId].name + ': ' + formats.join(', ') + '</span>';
+                    for (var format in s.brands[brandId]) {
+                        var status = s.brands[brandId][format];
+                        var text = status === 'available' ? 'Disponible' : 'Rupture';
+                        html += '<span class="brand-badge badge-' + status + '">';
+                        html += BRANDS[brandId].name + ' ' + format + ' : ' + text + '</span>';
                     }
                 }
             }
             html += '</div>';
         }
-        
         html += '<div class="station-btns">';
         html += '<button class="btn-edit" onclick="editStation(\'' + s.id + '\')">✏️ Modifier</button>';
-        html += '<button class="btn-delete" onclick="supprimerStation(\'' + s.id + '\')">🗑️ Supprimer</button>';
+        html += '<button class="btn-delete" onclick="supprimerStation(\'' + s.id + '\')">🗑️</button>';
         html += '</div></div>';
     }
     container.innerHTML = html;
@@ -281,53 +255,19 @@ function ajouterStation() {
     var lng = parseFloat(document.getElementById('lng').value);
     var brands = getBrandsData();
 
-    if (!nom || !adresse) {
-        alert('Remplissez le nom et l\'adresse !');
-        return;
-    }
-    if (isNaN(lat) || isNaN(lng)) {
-        alert('Coordonnées invalides !');
-        return;
-    }
-    if (Object.keys(brands).length === 0) {
-        alert('Sélectionnez au moins une marque et un format !');
-        return;
-    }
+    if (!nom || !adresse) { alert('Nom et adresse requis !'); return; }
+    if (isNaN(lat) || isNaN(lng)) { alert('Coordonnées invalides !'); return; }
+    if (Object.keys(brands).length === 0) { alert('Sélectionnez au moins un format !'); return; }
 
     if (editingStationId) {
-        var updates = {
-            name: nom,
-            address: adresse,
-            phone: telephone,
-            lat: lat,
-            lng: lng,
-            brands: brands,
-            updatedAt: Date.now()
-        };
-        db.ref('stations/' + editingStationId).update(updates).then(function() {
-            afficherToast('✅ Station mise à jour !');
-            resetForm();
-        }).catch(function(error) {
-            alert('Erreur: ' + error.message);
-        });
+        db.ref('stations/' + editingStationId).update({
+            name: nom, address: adresse, phone: telephone, lat: lat, lng: lng, brands: brands, updatedAt: Date.now()
+        }).then(function() { afficherToast('✅ Mis à jour !'); resetForm(); });
     } else {
         var id = 'station_' + Date.now();
-        var station = {
-            id: id,
-            name: nom,
-            address: adresse,
-            phone: telephone,
-            lat: lat,
-            lng: lng,
-            brands: brands,
-            updatedAt: Date.now()
-        };
-        db.ref('stations/' + id).set(station).then(function() {
-            afficherToast('✅ Station ajoutée !');
-            resetForm();
-        }).catch(function(error) {
-            alert('Erreur: ' + error.message);
-        });
+        db.ref('stations/' + id).set({
+            id: id, name: nom, address: adresse, phone: telephone, lat: lat, lng: lng, brands: brands, updatedAt: Date.now()
+        }).then(function() { afficherToast('✅ Ajouté !'); resetForm(); });
     }
 }
 
@@ -339,25 +279,16 @@ function editStation(id) {
         document.getElementById('telephone').value = s.phone || '';
         document.getElementById('lat').value = s.lat;
         document.getElementById('lng').value = s.lng;
-        
         setBrandsData(s.brands);
-        
         editingStationId = id;
-        document.getElementById('formTitle').textContent = '✏️ Modifier la station';
+        document.getElementById('formTitle').textContent = '✏️ Modifier';
         document.getElementById('submitBtn').textContent = '💾 Mettre à jour';
         document.getElementById('cancelBtn').style.display = 'block';
-        
         window.scrollTo(0, 0);
-        afficherStations(null);
-        db.ref('stations').once('value').then(function(snap) {
-            afficherStations(snap.val());
-        });
     });
 }
 
-function cancelEdit() {
-    resetForm();
-}
+function cancelEdit() { resetForm(); }
 
 function resetForm() {
     editingStationId = null;
@@ -366,27 +297,17 @@ function resetForm() {
     document.getElementById('telephone').value = '';
     document.getElementById('lat').value = '';
     document.getElementById('lng').value = '';
-    
-    for (var brandId in BRANDS) {
-        var brandCheckbox = document.getElementById('brand_' + brandId);
-        if (brandCheckbox) brandCheckbox.checked = false;
-        toggleBrand(brandId);
-    }
-    
-    document.getElementById('formTitle').textContent = '➕ Ajouter un point de vente';
-    document.getElementById('submitBtn').textContent = '➕ Ajouter la station';
+    setBrandsData(null);
+    document.getElementById('formTitle').textContent = '➕ Ajouter';
+    document.getElementById('submitBtn').textContent = '➕ Ajouter';
     document.getElementById('cancelBtn').style.display = 'none';
 }
 
 function supprimerStation(id) {
-    if (confirm('Supprimer cette station ?')) {
+    if (confirm('Supprimer ?')) {
         db.ref('stations/' + id).remove().then(function() {
-            afficherToast('✅ Station supprimée !');
-            if (editingStationId === id) {
-                resetForm();
-            }
-        }).catch(function(e) {
-            alert('Erreur: ' + e.message);
+            afficherToast('✅ Supprimé !');
+            if (editingStationId === id) resetForm();
         });
     }
 }
@@ -399,6 +320,5 @@ function afficherToast(msg) {
     setTimeout(function() { toast.remove(); }, 3000);
 }
 </script>
-
 </body>
 </html>

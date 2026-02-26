@@ -3,170 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GazDispo - Accès Gérant</title>
+    <title>GazDispo - Gérant</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #00A651 0%, #008C45 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .container { background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #00A651 0%, #008C45 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .container { background: white; border-radius: 20px; padding: 2rem; max-width: 700px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
         .header { text-align: center; margin-bottom: 2rem; }
         .header h1 { color: #00A651; font-size: 1.8rem; margin-bottom: 0.5rem; }
-        .header p { color: #7F8C8D; font-size: 0.9rem; }
-        .login-box { display: block; }
-        .login-box.hidden { display: none; }
-        .dashboard { display: none; }
-        .dashboard.active { display: block; }
         input { width: 100%; padding: 1rem; border: 2px solid #E0E0E0; border-radius: 10px; font-size: 1rem; margin-bottom: 1rem; }
-        input:focus { outline: none; border-color: #00A651; }
-        .btn { background: #00A651; color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #008C45; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,166,81,0.3); }
-        .btn:active { transform: translateY(0); }
-        .station-card { background: #F8F9FA; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #00A651; }
+        .btn { background: #00A651; color: white; border: none; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
+        .station-card { background: #F8F9FA; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
         .station-name { font-size: 1.3rem; font-weight: bold; color: #2C3E50; margin-bottom: 0.5rem; }
-        .station-address { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 1rem; }
-        .status-group { margin-top: 1.5rem; }
-        .status-group label { display: block; color: #2C3E50; font-weight: bold; margin-bottom: 0.8rem; font-size: 1rem; }
-        .status-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
-        .status-btn { padding: 1rem 0.5rem; border-radius: 10px; border: 3px solid; font-size: 0.9rem; font-weight: bold; cursor: pointer; background: white; transition: 0.2s; text-align: center; }
-        .status-btn:hover { transform: scale(1.05); }
-        .status-btn.available { border-color: #00A651; color: #00A651; }
-        .status-btn.available.active { background: #00A651; color: white; }
-        .status-btn.limited { border-color: #FCD116; color: #D4A017; }
-        .status-btn.limited.active { background: #FCD116; color: white; }
-        .status-btn.unavailable { border-color: #EF2B2D; color: #EF2B2D; }
-        .status-btn.unavailable.active { background: #EF2B2D; color: white; }
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #00A651; color: white; padding: 1rem 2rem; border-radius: 10px; font-weight: bold; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .error { background: #EF2B2D !important; }
-        .btn-logout { background: #7F8C8D; margin-top: 1rem; }
-        .btn-logout:hover { background: #5D6D7E; }
-        .hint { background: #E8F5E9; padding: 1rem; border-radius: 8px; color: #2C3E50; font-size: 0.9rem; margin-bottom: 1rem; border-left: 4px solid #00A651; }
+        .brand-group { background: white; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.8rem; }
+        .brand-name { font-weight: bold; color: #2C3E50; margin-bottom: 0.8rem; font-size: 1rem; }
+        .format-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; padding: 0.8rem; background: #F8F9FA; border-radius: 8px; }
+        .format-row input[type="checkbox"] { width: 20px; height: 20px; }
+        .format-row .format-label { min-width: 80px; font-weight: 600; font-size: 1.1rem; }
+        .status-toggle { display: flex; gap: 0.5rem; }
+        .status-toggle label { padding: 0.5rem 1rem; background: white; border: 2px solid #E0E0E0; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .status-toggle input[type="radio"] { width: 18px; height: 18px; }
+        .hidden { display: none; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #00A651; color: white; padding: 1rem 2rem; border-radius: 10px; font-weight: bold; z-index: 9999; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <div class="header">
-        <h1>🔐 Accès Gérant</h1>
-        <p>Mettez à jour votre station en temps réel</p>
+    <div class="header"><h1>🔐 Accès Gérant</h1></div>
+    <div id="loginBox">
+        <input type="text" id="codeInput" placeholder="Code station">
+        <button class="btn" onclick="login()">Connexion</button>
     </div>
-
-    <div id="loginBox" class="login-box">
-        <div class="hint">
-            ℹ️ Entrez le code fourni par l'administrateur GazDispo
-        </div>
-        <input type="text" id="codeInput" placeholder="Votre code (ex: station_1771863010190)" autocomplete="off">
-        <button class="btn" onclick="login()">Se connecter</button>
-    </div>
-
-    <div id="dashboard" class="dashboard">
+    <div id="dashboard" class="hidden">
         <div id="stationInfo"></div>
-        <button class="btn btn-logout" onclick="logout()">Déconnexion</button>
+        <div id="brandsContainer"></div>
+        <button class="btn" onclick="saveChanges()">💾 Sauvegarder</button>
+        <button class="btn" onclick="logout()" style="background:#7F8C8D;margin-top:1rem;">Déconnexion</button>
     </div>
 </div>
-
 <script src="firebase-app.js"></script>
 <script src="firebase-database.js"></script>
-
 <script>
-var firebaseConfig = {
-    apiKey: "AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
-    authDomain: "gazdispo-5a9b1.firebaseapp.com",
-    databaseURL: "https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "gazdispo-5a9b1",
-    storageBucket: "gazdispo-5a9b1.firebasestorage.app",
-    messagingSenderId: "815895848815",
-    appId: "1:815895848815:web:d6fdc94accc1f670ac6a9a"
-};
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
-
-var currentStation = null;
+firebase.initializeApp({apiKey:"AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",authDomain:"gazdispo-5a9b1.firebaseapp.com",databaseURL:"https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",projectId:"gazdispo-5a9b1",storageBucket:"gazdispo-5a9b1.firebasestorage.app",messagingSenderId:"815895848815",appId:"1:815895848815:web:d6fdc94accc1f670ac6a9a"});
+var db = firebase.database(), currentStation = null;
+var BRANDS = {'sodigaz':{name:'SODIGAZ',formats:['3kg','6kg','12kg','35kg']},'total':{name:'TotalEnergies',formats:['6kg','12kg','35kg']},'oryx':{name:'Oryx Energy',formats:['6kg','12kg','35kg']},'shell':{name:'Shell',formats:['6kg','12kg']},'pegaz':{name:'Pégaz',formats:['6kg','12kg']},'petrofa':{name:'Petrofa',formats:['6kg','12kg','35kg']},'ecogaz':{name:'Ecogaz',formats:['6kg','12kg']}};
 
 function login() {
-    var stationId = document.getElementById('codeInput').value.trim();
-    
-    if (!stationId) {
-        showToast('Veuillez entrer votre code', true);
-        return;
-    }
-    
-    db.ref('stations/' + stationId).once('value').then(function(snapshot) {
-        if (snapshot.exists()) {
-            currentStation = snapshot.val();
-            showDashboard();
-        } else {
-            showToast('Code invalide ou station introuvable.', true);
-        }
-    }).catch(function(error) {
-        showToast('Erreur de connexion: ' + error.message, true);
+    var id = document.getElementById('codeInput').value.trim();
+    if (!id) { alert('Entrez le code'); return; }
+    db.ref('stations/'+id).once('value').then(function(s) {
+        if (s.exists()) { currentStation = s.val(); showDashboard(); }
+        else alert('Code invalide');
     });
 }
 
 function showDashboard() {
     document.getElementById('loginBox').classList.add('hidden');
-    document.getElementById('dashboard').classList.add('active');
+    document.getElementById('dashboard').classList.remove('hidden');
+    var h = '<div class="station-card"><div class="station-name">'+currentStation.name+'</div><div>📍 '+currentStation.address+'</div>';
+    if (currentStation.phone) h += '<div>📞 '+currentStation.phone+'</div>';
+    h += '</div>';
+    document.getElementById('stationInfo').innerHTML = h;
     
-    displayStation();
-    
-    db.ref('stations/' + currentStation.id).on('value', function(snapshot) {
-        if (snapshot.exists()) {
-            currentStation = snapshot.val();
-            displayStation();
+    h = '';
+    for (var bid in BRANDS) {
+        var b = BRANDS[bid];
+        h += '<div class="brand-group"><div class="brand-name">'+b.name+'</div>';
+        for (var i = 0; i < b.formats.length; i++) {
+            var fmt = b.formats[i];
+            var fid = bid+'_'+fmt;
+            var chk = currentStation.brands && currentStation.brands[bid] && currentStation.brands[bid][fmt];
+            var st = chk ? currentStation.brands[bid][fmt] : 'available';
+            h += '<div class="format-row"><input type="checkbox" id="c_'+fid+'" '+(chk?'checked':'')+' onchange="toggle(\''+fid+'\')"><span class="format-label">'+fmt+'</span>';
+            h += '<div class="status-toggle" id="s_'+fid+'" style="display:'+(chk?'flex':'none')+';">';
+            h += '<label><input type="radio" name="r_'+fid+'" value="available" '+(st==='available'?'checked':'')+'> Dispo</label>';
+            h += '<label><input type="radio" name="r_'+fid+'" value="unavailable" '+(st==='unavailable'?'checked':'')+'> Rupture</label>';
+            h += '</div></div>';
         }
-    });
+        h += '</div>';
+    }
+    document.getElementById('brandsContainer').innerHTML = h;
 }
 
-function displayStation() {
-    var container = document.getElementById('stationInfo');
-    
-    var html = '<div class="station-card">';
-    html += '<div class="station-name">' + currentStation.name + '</div>';
-    html += '<div class="station-address">📍 ' + currentStation.address + '</div>';
-    
-    html += '<div class="status-group">';
-    html += '<label>Statut actuel de votre station :</label>';
-    html += '<div class="status-btns">';
-    html += '<button class="status-btn available' + (currentStation.status === 'available' ? ' active' : '') + '" onclick="updateStatus(\'available\')">✅<br>Disponible</button>';
-    html += '<button class="status-btn limited' + (currentStation.status === 'limited' ? ' active' : '') + '" onclick="updateStatus(\'limited\')">⚠️<br>Limité</button>';
-    html += '<button class="status-btn unavailable' + (currentStation.status === 'unavailable' ? ' active' : '') + '" onclick="updateStatus(\'unavailable\')">❌<br>Rupture</button>';
-    html += '</div>';
-    html += '</div>';
-    
-    html += '</div>';
-    
-    container.innerHTML = html;
+function toggle(fid) {
+    document.getElementById('s_'+fid).style.display = document.getElementById('c_'+fid).checked ? 'flex' : 'none';
 }
 
-function updateStatus(newStatus) {
-    if (!currentStation) return;
-    
-    db.ref('stations/' + currentStation.id).update({
-        status: newStatus,
-        updatedAt: Date.now()
-    }).then(function() {
-        currentStation.status = newStatus;
-        var statusText = newStatus === 'available' ? 'Disponible' : newStatus === 'limited' ? 'Stock limité' : 'Rupture';
-        showToast('Statut mis à jour : ' + statusText);
-        displayStation();
-    }).catch(function(error) {
-        showToast('Erreur de mise à jour', true);
+function saveChanges() {
+    var brands = {};
+    for (var bid in BRANDS) {
+        for (var i = 0; i < BRANDS[bid].formats.length; i++) {
+            var fmt = BRANDS[bid].formats[i], fid = bid+'_'+fmt;
+            var chk = document.getElementById('c_'+fid);
+            if (chk && chk.checked) {
+                if (!brands[bid]) brands[bid] = {};
+                var radios = document.getElementsByName('r_'+fid), st = 'available';
+                for (var j = 0; j < radios.length; j++) { if (radios[j].checked) { st = radios[j].value; break; } }
+                brands[bid][fmt] = st;
+            }
+        }
+    }
+    if (Object.keys(brands).length === 0) { alert('Sélectionnez au moins 1 format'); return; }
+    db.ref('stations/'+currentStation.id).update({brands:brands,updatedAt:Date.now()}).then(function() {
+        var t = document.createElement('div'); t.className = 'toast'; t.textContent = '✅ Sauvegardé !';
+        document.body.appendChild(t); setTimeout(function() { t.remove(); }, 3000);
     });
 }
 
 function logout() {
     currentStation = null;
     document.getElementById('loginBox').classList.remove('hidden');
-    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('codeInput').value = '';
 }
-
-function showToast(msg, isError) {
-    var toast = document.createElement('div');
-    toast.className = 'toast' + (isError ? ' error' : '');
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(function() { toast.remove(); }, 3000);
-}
 </script>
-
 </body>
 </html>

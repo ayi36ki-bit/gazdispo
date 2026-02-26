@@ -4,28 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00A651">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>GazDispo - Votre gaz sans galère</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
     <style>
-        .filters { background: white; padding: 1rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        :root {
+            --burkinabe-green: #00A651;
+            --burkinabe-red: #EF2B2D;
+            --burkinabe-yellow: #FCD116;
+        }
+        
+        /* Header avec couleurs Burkina */
+        .header {
+            background: linear-gradient(135deg, var(--burkinabe-red) 0%, var(--burkinabe-green) 100%);
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .logo h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .language-selector {
+            background: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--burkinabe-green);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-refresh {
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .refresh-icon {
+            font-size: 1.3rem;
+        }
+        
+        /* Reste du style */
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .main-content { display: flex; flex-direction: column; height: calc(100vh - 70px); }
+        .map-container { height: 40%; }
+        .bottom-panel { height: 60%; overflow-y: auto; background: #f5f5f5; }
+        .panel-header { background: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--burkinabe-yellow); }
+        .panel-header h2 { margin: 0; color: var(--burkinabe-green); }
+        .last-update { font-size: 0.85rem; color: #666; }
+        
+        .filters { background: white; padding: 1rem; margin: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid var(--burkinabe-green); }
         .filters-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.8rem; align-items: end; }
-        .filter-group label { display: block; font-size: 0.85rem; color: #7F8C8D; margin-bottom: 0.3rem; font-weight: 500; }
-        .filter-group select { width: 100%; padding: 0.8rem; border: 2px solid #E0E0E0; border-radius: 8px; font-size: 0.95rem; background: white; }
-        .filter-group select:focus { outline: none; border-color: #00A651; }
-        .btn-filter { background: #00A651; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .filter-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.3rem; font-weight: 600; }
+        .filter-group select { width: 100%; padding: 0.8rem; border: 2px solid #E0E0E0; border-radius: 8px; font-size: 0.95rem; }
+        .btn-filter { background: var(--burkinabe-green); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-filter:hover { background: #008C45; }
-        .btn-reset { background: #7F8C8D; color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; margin-left: 0.5rem; }
+        .btn-reset { background: #7F8C8D; color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; cursor: pointer; margin-left: 0.5rem; }
+        
+        .search-container { position: relative; margin: 0 1rem 1rem 1rem; }
+        .search-input { width: 100%; padding: 0.8rem 3rem 0.8rem 1rem; border: 2px solid #E0E0E0; border-radius: 8px; font-size: 1rem; }
+        .search-icon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #999; }
+        
+        .stations-list { padding: 0 1rem 1rem 1rem; }
+        .station-card { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; border-left: 4px solid var(--burkinabe-yellow); }
+        .station-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .station-name { font-weight: bold; font-size: 1.1rem; color: var(--burkinabe-green); margin-bottom: 0.5rem; }
+        .station-address { color: #666; font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .station-address a { color: var(--burkinabe-green); text-decoration: underline; }
+        .station-phone { color: var(--burkinabe-green); font-size: 0.9rem; margin-bottom: 0.8rem; }
+        
         .brands-display { margin: 0.8rem 0; }
-        .brand-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #ECF0F1; }
+        .brand-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; }
         .brand-item:last-child { border-bottom: none; }
-        .brand-name-display { font-weight: 600; color: #2C3E50; font-size: 0.9rem; }
-        .brand-formats { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-        .format-badge { background: #E8F5E9; color: #00A651; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
-        .no-brands { color: #95A5A6; font-style: italic; font-size: 0.85rem; text-align: center; padding: 1rem; }
-        @media (max-width: 640px) {
+        .brand-name-display { font-weight: 600; color: #2C3E50; font-size: 1rem; }
+        .brand-formats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .format-badge { padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600; }
+        .format-available { background: #E8F5E9; color: var(--burkinabe-green); }
+        .format-unavailable { background: #FFEBEE; color: var(--burkinabe-red); }
+        
+        .loading { text-align: center; padding: 3rem; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--burkinabe-green); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        @media (max-width: 768px) {
             .filters-row { grid-template-columns: 1fr; }
             .btn-filter, .btn-reset { width: 100%; margin: 0.5rem 0 0 0; }
         }
@@ -35,13 +140,14 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <span class="logo-icon">🔥</span>
-                <h1>GazDispo</h1>
+                <div class="logo-icon">🔥</div>
+                <h1 id="appName">GazDispo</h1>
             </div>
             <div class="header-actions">
                 <select id="languageSelector" class="language-selector">
                     <option value="fr">Français</option>
                     <option value="moore">Mooré</option>
+                    <option value="en">English</option>
                 </select>
                 <button id="refreshBtn" class="btn-refresh">
                     <span class="refresh-icon">🔄</span>
@@ -64,9 +170,9 @@
             <div class="filters">
                 <div class="filters-row">
                     <div class="filter-group">
-                        <label for="brandFilter">🏷️ Marque</label>
+                        <label for="brandFilter" id="brandLabel">🏷️ Marque</label>
                         <select id="brandFilter">
-                            <option value="">Toutes les marques</option>
+                            <option value="">Toutes</option>
                             <option value="sodigaz">SODIGAZ</option>
                             <option value="total">TotalEnergies</option>
                             <option value="oryx">Oryx Energy</option>
@@ -77,130 +183,120 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label for="formatFilter">📦 Format</label>
+                        <label for="formatFilter" id="formatLabel">📦 Format</label>
                         <select id="formatFilter">
-                            <option value="">Tous les formats</option>
+                            <option value="">Tous</option>
                             <option value="3kg">3 kg</option>
                             <option value="6kg">6 kg</option>
-                            <option value="12.5kg">12,5 kg</option>
+                            <option value="12kg">12 kg</option>
                             <option value="35kg">35 kg</option>
                         </select>
                     </div>
                     <div>
-                        <button class="btn-filter" onclick="applyFilters()">🔍 Rechercher</button>
-                        <button class="btn-reset" onclick="resetFilters()">✖️</button>
+                        <button class="btn-filter" id="filterBtn" onclick="applyFilters()">🔍</button>
+                        <button class="btn-reset" id="resetBtn" onclick="resetFilters()">✖️</button>
                     </div>
                 </div>
             </div>
 
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un quartier...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher...">
                 <span class="search-icon">🔍</span>
             </div>
             
             <div id="stationsList" class="stations-list">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Chargement...</p>
+                    <p id="loadingText">Chargement...</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="offlineIndicator" class="offline-indicator hidden">
-        <span>📡 Mode hors ligne</span>
-    </div>
-
     <script src="firebase-app.js"></script>
     <script src="firebase-database.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="translations.js"></script>
     <script>
-var map;
-var markers = [];
-var allStations = [];
-var filteredStations = [];
-var currentLang = 'fr';
-var db;
+var map, markers = [], allStations = [], filteredStations = [], db;
+var currentLang = localStorage.getItem('gazdispo_lang') || 'fr';
 
 var BRANDS = {
-    'sodigaz': 'SODIGAZ',
-    'total': 'TotalEnergies',
-    'oryx': 'Oryx Energy',
-    'shell': 'Shell',
-    'pegaz': 'Pégaz',
-    'petrofa': 'Petrofa',
-    'ecogaz': 'Ecogaz'
+    'sodigaz': 'SODIGAZ', 'total': 'TotalEnergies', 'oryx': 'Oryx Energy',
+    'shell': 'Shell', 'pegaz': 'Pégaz', 'petrofa': 'Petrofa', 'ecogaz': 'Ecogaz'
 };
 
-var translations = {
-    fr: {
-        updatedAt: "Mis à jour il y a",
-        minutes: "min",
-        hours: "h",
-        noStations: "Aucun point de vente trouvé"
-    },
-    moore: {
-        updatedAt: "Yãmb sã",
-        minutes: "minit",
-        hours: "wakat",
-        noStations: "Gaz yõodo tɩ be"
-    }
-};
-
+// Initialisation
 document.addEventListener('DOMContentLoaded', function() {
-    try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp({
-                apiKey: "AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
-                authDomain: "gazdispo-5a9b1.firebaseapp.com",
-                databaseURL: "https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
-                projectId: "gazdispo-5a9b1",
-                storageBucket: "gazdispo-5a9b1.firebasestorage.app",
-                messagingSenderId: "815895848815",
-                appId: "1:815895848815:web:d6fdc94accc1f670ac6a9a"
-            });
-        }
-        db = firebase.database();
-        console.log('✅ Firebase OK!');
-    } catch(e) {
-        console.error('❌ Erreur Firebase:', e);
-    }
-
-    currentLang = localStorage.getItem('gazdispo_lang') || 'fr';
-    var langSelector = document.getElementById('languageSelector');
-    if (langSelector) langSelector.value = currentLang;
-
+    firebase.initializeApp({
+        apiKey:"AIzaSyAPRPagTMM5etUPT7T-rBgKikV2QmVHoAQ",
+        authDomain:"gazdispo-5a9b1.firebaseapp.com",
+        databaseURL:"https://gazdispo-5a9b1-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId:"gazdispo-5a9b1",
+        storageBucket:"gazdispo-5a9b1.firebasestorage.app",
+        messagingSenderId:"815895848815",
+        appId:"1:815895848815:web:d6fdc94accc1f670ac6a9a"
+    });
+    db = firebase.database();
+    
+    // Charger langue sauvegardée
+    document.getElementById('languageSelector').value = currentLang;
+    updateLanguage();
+    
     initMap();
     loadStations();
-
-    var searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            var query = e.target.value.toLowerCase();
-            var filtered = filteredStations.filter(function(s) {
-                return s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query);
-            });
-            afficherStations(filtered);
-            updateMap(filtered);
+    
+    // Events
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        var q = e.target.value.toLowerCase();
+        var f = filteredStations.filter(function(s) {
+            return s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q);
         });
-    }
-
-    var refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            loadStations();
-        });
-    }
-
-    var langSel = document.getElementById('languageSelector');
-    if (langSel) {
-        langSel.addEventListener('change', function(e) {
-            currentLang = e.target.value;
-            localStorage.setItem('gazdispo_lang', currentLang);
-            afficherStations(filteredStations);
-        });
+        afficherStations(f);
+        updateMap(f);
+    });
+    
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        loadStations();
+    });
+    
+    document.getElementById('languageSelector').addEventListener('change', function(e) {
+        currentLang = e.target.value;
+        localStorage.setItem('gazdispo_lang', currentLang);
+        updateLanguage();
+        afficherStations(filteredStations);
+    });
+    
+    // Demander permission notifications
+    if ('Notification' in window && Notification.permission === 'default') {
+        setTimeout(function() {
+            if (confirm(translate('Recevoir des notifications quand les stations sont mises à jour ?'))) {
+                Notification.requestPermission();
+            }
+        }, 5000);
     }
 });
+
+function translate(key) {
+    return translations[currentLang][key] || key;
+}
+
+function updateLanguage() {
+    document.getElementById('appName').textContent = translate('appName');
+    document.getElementById('panelTitle').textContent = translate('availableStations');
+    document.getElementById('lastUpdateLabel').textContent = translate('lastUpdate') + ':';
+    document.getElementById('brandLabel').textContent = '🏷️ ' + translate('brand');
+    document.getElementById('formatLabel').textContent = '📦 ' + translate('format');
+    document.getElementById('searchInput').placeholder = translate('search');
+    document.getElementById('loadingText').textContent = translate('loading');
+    
+    // Update select options
+    var brandFilter = document.getElementById('brandFilter');
+    brandFilter.options[0].text = translate('allBrands');
+    
+    var formatFilter = document.getElementById('formatFilter');
+    formatFilter.options[0].text = translate('allFormats');
+}
 
 function initMap() {
     map = L.map('map').setView([12.3714, -1.5197], 12);
@@ -210,60 +306,46 @@ function initMap() {
 }
 
 function loadStations() {
-    if (!db) {
-        console.error('Firebase non initialisé');
-        return;
-    }
-
-    console.log('Chargement des stations...');
-
-    db.ref('stations').on('value', function(snapshot) {
-        var data = snapshot.val();
-
-        if (data) {
-            allStations = Object.values(data);
-            filteredStations = allStations;
-            console.log('✅ Stations:', allStations.length);
-        } else {
-            console.log('Aucune station');
-            allStations = [];
-            filteredStations = [];
-        }
-
+    if (!db) return;
+    db.ref('stations').on('value', function(s) {
+        allStations = s.val() ? Object.values(s.val()) : [];
+        filteredStations = allStations;
         applyFilters();
-
-        var now = new Date();
-        var timeEl = document.getElementById('lastUpdateTime');
-        if (timeEl) {
-            timeEl.textContent = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+        
+        var t = new Date();
+        document.getElementById('lastUpdateTime').textContent = 
+            t.getHours() + ':' + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+        
+        // Notification si changement
+        if ('Notification' in window && Notification.permission === 'granted') {
+            if (allStations.length > 0) {
+                new Notification('GazDispo', {
+                    body: allStations.length + ' ' + translate('availableStations'),
+                    icon: 'logo.svg'
+                });
+            }
         }
-
-        localStorage.setItem('gazdispo_cache', JSON.stringify(allStations));
     });
 }
 
 function applyFilters() {
-    var brandFilter = document.getElementById('brandFilter').value;
-    var formatFilter = document.getElementById('formatFilter').value;
-
+    var b = document.getElementById('brandFilter').value;
+    var f = document.getElementById('formatFilter').value;
+    
     filteredStations = allStations.filter(function(s) {
-        if (!brandFilter && !formatFilter) return true;
+        if (!b && !f) return true;
         if (!s.brands) return false;
-
-        if (brandFilter && formatFilter) {
-            return s.brands[brandFilter] && s.brands[brandFilter][formatFilter];
-        } else if (brandFilter) {
-            return s.brands[brandFilter] !== undefined;
-        } else if (formatFilter) {
-            for (var brand in s.brands) {
-                if (s.brands[brand][formatFilter]) return true;
+        
+        for (var brand in s.brands) {
+            if (b && brand !== b) continue;
+            for (var format in s.brands[brand]) {
+                if (f && format !== f) continue;
+                if (s.brands[brand][format] === 'available') return true;
             }
-            return false;
         }
-
-        return true;
+        return false;
     });
-
+    
     afficherStations(filteredStations);
     updateMap(filteredStations);
 }
@@ -277,94 +359,75 @@ function resetFilters() {
     updateMap(filteredStations);
 }
 
+function openGPS(lat, lng) {
+    window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+}
+
 function afficherStations(liste) {
-    var container = document.getElementById('stationsList');
-    if (!container) return;
-
-    var t = translations[currentLang];
-
-    if (liste.length === 0) {
-        container.innerHTML = '<p style="text-align:center;padding:2rem;color:#999;">' + t.noStations + '</p>';
+    var c = document.getElementById('stationsList');
+    if (!liste.length) {
+        c.innerHTML = '<p style="text-align:center;padding:2rem;color:#999;">' + translate('noResults') + '</p>';
         return;
     }
-
-    var html = '';
+    
+    var h = '';
     for (var i = 0; i < liste.length; i++) {
         var s = liste[i];
-        var diff = Date.now() - s.updatedAt;
-        var timeAgo = Math.floor(diff / 60000) + ' ' + t.minutes;
-        if (diff > 3600000) timeAgo = Math.floor(diff / 3600000) + ' ' + t.hours;
-
-        html += '<div class="station-card" onclick="focusStation(\'' + s.id + '\')">';
-        html += '<div class="station-header">';
-        html += '<div class="station-name">' + s.name + '</div>';
-        html += '</div>';
-        html += '<div class="station-address">📍 ' + s.address + '</div>';
+        h += '<div class="station-card" onclick="focusStation(\'' + s.id + '\')">';
+        h += '<div class="station-name">' + s.name + '</div>';
+        h += '<div class="station-address"><a onclick="event.stopPropagation();openGPS(' + s.lat + ',' + s.lng + ')">';
+        h += '📍 ' + s.address + '</a></div>';
         
         if (s.phone) {
-            html += '<div class="station-phone"><a href="tel:' + s.phone + '" style="color:#00A651;text-decoration:none;" onclick="event.stopPropagation()">📞 ' + s.phone + '</a></div>';
+            h += '<div class="station-phone"><a href="tel:' + s.phone + '" onclick="event.stopPropagation()">';
+            h += '📞 ' + s.phone + '</a></div>';
         }
-
-        if (s.brands && Object.keys(s.brands).length > 0) {
-            html += '<div class="brands-display">';
-            for (var brandId in s.brands) {
-                if (BRANDS[brandId]) {
-                    var formats = Object.keys(s.brands[brandId]);
-                    if (formats.length > 0) {
-                        html += '<div class="brand-item">';
-                        html += '<span class="brand-name-display">' + BRANDS[brandId] + '</span>';
-                        html += '<div class="brand-formats">';
-                        for (var j = 0; j < formats.length; j++) {
-                            html += '<span class="format-badge">' + formats[j] + '</span>';
-                        }
-                        html += '</div></div>';
+        
+        if (s.brands) {
+            h += '<div class="brands-display">';
+            for (var bid in s.brands) {
+                if (BRANDS[bid]) {
+                    h += '<div class="brand-item">';
+                    h += '<span class="brand-name-display">' + BRANDS[bid] + '</span>';
+                    h += '<div class="brand-formats">';
+                    for (var fmt in s.brands[bid]) {
+                        var st = s.brands[bid][fmt];
+                        var txt = st === 'available' ? translate('available') : translate('unavailable');
+                        h += '<span class="format-badge format-' + st + '">' + fmt + ' : ' + txt + '</span>';
                     }
+                    h += '</div></div>';
                 }
             }
-            html += '</div>';
-        } else {
-            html += '<div class="no-brands">Informations de stock non disponibles</div>';
+            h += '</div>';
         }
-
-        html += '<div class="station-updated">' + t.updatedAt + ' ' + timeAgo + '</div>';
-        html += '</div>';
+        h += '</div>';
     }
-    container.innerHTML = html;
+    c.innerHTML = h;
 }
 
 function updateMap(liste) {
     markers.forEach(function(m) { map.removeLayer(m); });
     markers = [];
-
+    
     liste.forEach(function(s) {
-        var color = '#00A651';
-
-        var marker = L.marker([s.lat, s.lng], {
-            icon: L.divIcon({
-                className: '',
-                html: '<div style="background:' + color + ';width:28px;height:28px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
-                iconSize: [28, 28]
-            })
-        }).addTo(map);
-
-        var popupHtml = '<strong>' + s.name + '</strong><br>' + s.address;
-        if (s.phone) {
-            popupHtml += '<br>📞 ' + s.phone;
-        }
+        var m = L.marker([s.lat, s.lng]).addTo(map);
+        var p = '<b>' + s.name + '</b><br>' + s.address;
+        if (s.phone) p += '<br>📞 ' + s.phone;
         if (s.brands) {
-            popupHtml += '<br><br>';
-            for (var brandId in s.brands) {
-                if (BRANDS[brandId]) {
-                    var formats = Object.keys(s.brands[brandId]);
-                    if (formats.length > 0) {
-                        popupHtml += '<strong>' + BRANDS[brandId] + ':</strong> ' + formats.join(', ') + '<br>';
+            p += '<br><br>';
+            for (var bid in s.brands) {
+                if (BRANDS[bid]) {
+                    p += '<b>' + BRANDS[bid] + ':</b><br>';
+                    for (var fmt in s.brands[bid]) {
+                        var st = s.brands[bid][fmt] === 'available' ? translate('available') : translate('unavailable');
+                        p += fmt + ' : ' + st + '<br>';
                     }
                 }
             }
         }
-
-        marker.bindPopup(popupHtml);
-        markers.push(marker);
+        p += '<br><a href="#" onclick="openGPS(' + s.lat + ',' + s.lng + ');return false;">🧭 GPS</a>';
+        m.bindPopup(p);
+        markers.push(m);
     });
 }
 
@@ -373,9 +436,7 @@ function focusStation(id) {
     if (s) {
         map.setView([s.lat, s.lng], 15);
         markers.forEach(function(m) {
-            if (m.getLatLng().lat === s.lat && m.getLatLng().lng === s.lng) {
-                m.openPopup();
-            }
+            if (m.getLatLng().lat === s.lat) m.openPopup();
         });
     }
 }
